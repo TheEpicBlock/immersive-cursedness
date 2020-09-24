@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "immersive-cursedness",
   "version": "${version}",
 
   "name": "Example Mod",
@@ -19,11 +19,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "nl.theepicblock.immersive_cursedness.ImmersiveCursedness"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "immersive-cursedness.mixins.json"
   ],
 
   "depends": {
