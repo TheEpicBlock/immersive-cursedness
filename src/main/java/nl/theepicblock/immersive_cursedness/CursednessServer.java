@@ -3,14 +3,21 @@ package nl.theepicblock.immersive_cursedness;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CursednessServer {
+    public static final int PORTAL_RENDER_DISTANCE = 3; //measured in chunks
     private final MinecraftServer server;
     private volatile boolean isServerActive = true;
     private long nextTick;
+    private Map<ServerPlayerEntity, PlayerManager> playerManagers = new HashMap<>();
 
     public CursednessServer(MinecraftServer server) {
         this.server = server;
@@ -20,8 +27,12 @@ public class CursednessServer {
         System.out.println("Starting cursedness immersedness server");
         while (isServerActive) {
             if (System.currentTimeMillis() < nextTick) continue;
-            tick();
-            System.out.println("TICK "+nextTick);
+            try {
+                tick();
+            } catch (Exception e) {
+                System.out.println("Exception occurred whilst ticking the immersive cursedness thread");
+                e.printStackTrace();
+            }
             nextTick = System.currentTimeMillis()+1000;//todo change this to 50
         }
     }
@@ -32,8 +43,19 @@ public class CursednessServer {
     }
 
     public void tick() {
-        server.getPlayerManager().getPlayerList().forEach((player) -> {
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(new BlockPos(0,4,0), Blocks.BROWN_MUSHROOM_BLOCK.getDefaultState()));
+        //Sync player managers
+        List<ServerPlayerEntity> playerList = server.getPlayerManager().getPlayerList();
+
+        playerManagers.entrySet().removeIf(i -> !playerList.contains(i.getKey()));
+        for (ServerPlayerEntity player : playerList) {
+            if (!playerManagers.containsKey(player)) {
+                playerManagers.put(player, new PlayerManager(player));
+            }
+        }
+
+        //Tick player managers
+        playerManagers.forEach((player, manager) -> {
+            manager.tick();
         });
     }
 }
