@@ -21,20 +21,21 @@ import java.util.stream.Stream;
 
 public class PortalManager {
     private final ArrayList<BlockPos> checked = new ArrayList<>();
-    private final ArrayList<BlockPos> newChecked = new ArrayList<>();
+    private final ArrayList<Portal> portals = new ArrayList<>();
 
     public void update(ServerPlayerEntity player) {
         ServerWorld world = player.getServerWorld();
 
         Stream<PointOfInterest> portalStream = getPortalsInChunkRadius(world.getPointOfInterestStorage(), player.getBlockPos(), CursednessServer.PORTAL_RENDER_DISTANCE);
         PointOfInterest[] portals = portalStream.toArray(PointOfInterest[]::new);
-        newChecked.clear();
+
+        checked.clear();
+        this.portals.clear();
 
         for (PointOfInterest portal : portals) {
             try {
                 BlockPos portalP = portal.getPos();
-                newChecked.add(portalP);
-                if (checked.contains(portalP)) return;
+                if (checked.contains(portalP)) continue;
 
                 BlockState bs = world.getBlockState(portalP);
                 Direction.Axis axis = bs.get(NetherPortalBlock.AXIS);
@@ -55,12 +56,29 @@ public class PortalManager {
                 }
 
                 Portal p = new Portal(upperRight, lowerLeft, axis);
+                this.portals.add(p);
 
+                BlockPos.iterate(upperRight,lowerLeft).forEach((pos) -> {
+                    checked.add(pos.toImmutable());
+                });
             } catch (IllegalArgumentException ignored) {}
         }
+    }
 
-        checked.clear();
-        checked.addAll(newChecked);
+    private void garbageCollect(ServerPlayerEntity player) {
+        portals.removeIf(portal ->
+            portal.getDistance(player.getBlockPos()) > CursednessServer.PORTAL_RENDER_DISTANCE*16
+        );
+        portals.removeIf(portal -> {
+            for (Portal portal1 : portals) {
+                if (portal1.contains(portal)) return true;
+            }
+            return false;
+        });
+    }
+
+    public ArrayList<Portal> getPortals() {
+        return portals;
     }
 
     private Stream<PointOfInterest> getPortalsInChunkRadius(PointOfInterestStorage storage, BlockPos pos, int radius) {

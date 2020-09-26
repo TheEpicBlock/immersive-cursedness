@@ -14,4 +14,48 @@ public class AxisAlignedRectangle {
         this.lowerLeft = lowerLeft;
         this.axis = axis;
     }
+
+    public double getDistance(BlockPos pos) {
+        return upperRight.getSquaredDistance(pos);
+    }
+
+    /**
+     * Returns true if this rectangle fully encloses b
+     */
+    public boolean contains(AxisAlignedRectangle b) {
+        if (this.getAxis() != b.getAxis()) return false;
+        if (this.getTop() < b.getTop() ||
+            this.getBottom() > b.getBottom()) return false;
+        Direction.Axis axis = this.getAxis();
+        return this.getRight() >= b.getRight() &&
+               this.getLeft() <= b.getLeft();
+    }
+
+    public BlockPos getUpperRight() {
+        return upperRight;
+    }
+
+    public BlockPos getLowerLeft() {
+        return lowerLeft;
+    }
+
+    public Direction.Axis getAxis() {
+        return axis;
+    }
+
+    public int getLeft() {
+        return Util.get(this.getLowerLeft(), this.getAxis());
+    }
+
+    public int getRight() {
+        return Util.get(this.getUpperRight(), this.getAxis());
+    }
+
+    public int getTop() {
+        return this.getUpperRight().getY();
+    }
+
+    public int getBottom() {
+        return this.getLowerLeft().getY();
+    }
 }
