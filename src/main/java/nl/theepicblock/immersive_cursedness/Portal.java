@@ -5,7 +5,7 @@ import net.minecraft.util.math.Direction;
 
 import javax.sound.sampled.Port;
 
-public class Portal implements AxisAlignedRectangle<BlockPos> {
+public class Portal {
     //Right is defined as the most positive point in whatever axis this is
     private BlockPos upperRight;
     private BlockPos lowerLeft;
@@ -17,7 +17,6 @@ public class Portal implements AxisAlignedRectangle<BlockPos> {
         this.axis = axis;
     }
 
-    @Override
     public double getDistance(BlockPos pos) {
         return upperRight.getSquaredDistance(pos);
     }
@@ -34,17 +33,14 @@ public class Portal implements AxisAlignedRectangle<BlockPos> {
                 this.getLeft() <= b.getLeft();
     }
 
-    @Override
     public BlockPos getUpperRight() {
         return upperRight;
     }
 
-    @Override
     public BlockPos getLowerLeft() {
         return lowerLeft;
     }
 
-    @Override
     public Direction.Axis getAxis() {
         return axis;
     }
