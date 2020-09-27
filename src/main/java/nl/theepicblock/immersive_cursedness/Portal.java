@@ -2,6 +2,7 @@ package nl.theepicblock.immersive_cursedness;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 import javax.sound.sampled.Port;
 
@@ -59,5 +60,16 @@ public class Portal {
 
     public int getBottom() {
         return this.getLowerLeft().getY();
+    }
+
+    public FlatStandingRectangle toFlatStandingRectangle() {
+        return new FlatStandingRectangle(
+                this.getTop()+1,
+                this.getBottom(),
+                this.getLeft(),
+                this.getRight()+1,
+                Util.get(this.getUpperRight(),Util.rotate(axis))+0.5,
+                Util.rotate(axis)
+        );
     }
 }

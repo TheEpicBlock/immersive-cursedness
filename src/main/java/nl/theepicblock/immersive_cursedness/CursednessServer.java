@@ -33,7 +33,7 @@ public class CursednessServer {
                 System.out.println("Exception occurred whilst ticking the immersive cursedness thread");
                 e.printStackTrace();
             }
-            nextTick = System.currentTimeMillis()+1000;//todo change this to 50
+            nextTick = System.currentTimeMillis()+100;//todo change this to 50
         }
     }
 
