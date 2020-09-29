@@ -17,7 +17,7 @@ public class CursednessServer {
     private final MinecraftServer server;
     private volatile boolean isServerActive = true;
     private long nextTick;
-    private Map<ServerPlayerEntity, PlayerManager> playerManagers = new HashMap<>();
+    private final Map<ServerPlayerEntity, PlayerManager> playerManagers = new HashMap<>();
 
     public CursednessServer(MinecraftServer server) {
         this.server = server;
@@ -33,7 +33,7 @@ public class CursednessServer {
                 System.out.println("Exception occurred whilst ticking the immersive cursedness thread");
                 e.printStackTrace();
             }
-            nextTick = System.currentTimeMillis()+100;//todo change this to 50
+            nextTick = System.currentTimeMillis()+50;//todo change this to 50
         }
     }
 

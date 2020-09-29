@@ -1,5 +1,6 @@
 package nl.theepicblock.immersive_cursedness;
 
+import com.google.common.primitives.Doubles;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -34,11 +35,11 @@ public class FlatStandingRectangle {
     }
 
     public BlockPos getBottomLeftBlock() {
-        return createBlockPos(bottom, left);
+        return createBlockPos(clamp(bottom,0,255), left);
     }
 
     public BlockPos getTopRightBlock() {
-        return createBlockPos(top-1, right-1);
+        return createBlockPos(clamp(top-1,0,255), right-1);
     }
 
     public FlatStandingRectangle expand(int i, Vec3d source) {
@@ -70,5 +71,9 @@ public class FlatStandingRectangle {
         } else {
             return new BlockPos(primaryAxis, y, other);
         }
+    }
+
+    private double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
     }
 }

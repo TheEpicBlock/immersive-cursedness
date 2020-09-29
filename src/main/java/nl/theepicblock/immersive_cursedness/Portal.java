@@ -72,4 +72,20 @@ public class Portal {
                 Util.rotate(axis)
         );
     }
+
+    public int getYawRelativeTo(BlockPos pos) {
+        if (this.axis == Direction.Axis.Z) {
+            if (pos.getX()-this.lowerLeft.getX()<0) {
+                return -90;
+            } else {
+                return 90;
+            }
+        } else {
+            if (pos.getZ()-this.lowerLeft.getZ()<0) {
+                return 0;
+            } else {
+                return 180;
+            }
+        }
+    }
 }
