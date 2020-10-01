@@ -64,10 +64,10 @@ public class Portal {
 
     public FlatStandingRectangle toFlatStandingRectangle() {
         return new FlatStandingRectangle(
-                this.getTop()+1,
+                this.getTop()+1.2,
                 this.getBottom(),
-                this.getLeft(),
-                this.getRight()+1,
+                this.getLeft()-0.2,
+                this.getRight()+1.2,
                 Util.get(this.getUpperRight(),Util.rotate(axis))+0.5,
                 Util.rotate(axis)
         );

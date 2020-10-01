@@ -35,11 +35,21 @@ public class FlatStandingRectangle {
     }
 
     public BlockPos getBottomLeftBlock() {
-        return createBlockPos(clamp(bottom,0,255), left);
+        return createBlockPos(bottom, left);
     }
 
     public BlockPos getTopRightBlock() {
-        return createBlockPos(clamp(top-1,0,255), right-1);
+        return createBlockPos(top-1, right-1);
+    }
+
+    public BlockPos getBottomLeftBlockClamped(Vec3d center, int limit) {
+        double centerP = Util.get(center, Util.rotate(axis));
+        return createBlockPos(clamp(bottom,0,255), clamp(left,centerP-limit,centerP+limit));
+    }
+
+    public BlockPos getTopRightBlockClamped(Vec3d center, int limit) {
+        double centerP = Util.get(center, Util.rotate(axis));
+        return createBlockPos(clamp(top-1,0,255), clamp(right-1,centerP-limit,centerP+limit));
     }
 
     public FlatStandingRectangle expand(int i, Vec3d source) {
