@@ -3,18 +3,18 @@
   "id": "immersive-cursedness",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Immersive Cursedness",
+  "description": "Immersive portals but serverside. Together with some lovely cursed multithreading",
   "authors": [
-    "Me!"
+    "TheEpicBlock"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/TheEpicBlock/immersive-cursedness/blob/master/README.md",
+    "sources": "https://github.com/TheEpicBlock/immersive-cursedness"
   },
 
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "license": "LGPL",
+  "icon": "assets/immersive-cursedness/icon.png",
 
   "environment": "*",
   "entrypoints": {
@@ -32,6 +32,5 @@
     "minecraft": "1.16.x"
   },
   "suggests": {
-    "flamingo": "*"
   }
 }
