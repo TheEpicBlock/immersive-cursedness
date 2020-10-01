@@ -35,14 +35,17 @@ public class PlayerManager {
         portalManager = new PortalManager();
     }
 
-    public void tick() {
-        portalManager.update(player);
+    public void tick(int tickCount) {
+        if (tickCount % 30 == 0) {
+            portalManager.update(player);
+        }
         ServerWorld serverWorld = this.player.getServerWorld();
         ServerWorld destination = this.getDestination();
 
         HashMap<BlockPos,BlockState> newSentBlocks = new HashMap<>();
 
         List<Entity> entities = this.getEntitiesInRange();
+        if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
 
         //iterate through all portals
         portalManager.getPortals().forEach(portal -> {
@@ -142,6 +145,11 @@ public class PlayerManager {
                 Arrays.stream(world.getChunk(chunkPos.x,chunkPos.z).getEntitySectionArray()).flatMap(
                         (Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream))
                 .collect(Collectors.toList());
+    }
+
+    private void removeNoLongerExistingEntities(List<Entity> existingEntities) {
+        hiddenEntities.removeIf((uuid) ->
+                existingEntities.stream().noneMatch(entity -> uuid.equals(entity.getUuid())));
     }
 
     private ServerWorld getDestination() {
