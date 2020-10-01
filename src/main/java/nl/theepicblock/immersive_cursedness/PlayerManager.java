@@ -4,21 +4,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.collection.TypeFilterableList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
-import net.minecraft.world.poi.PointOfInterest;
-import net.minecraft.world.poi.PointOfInterestStorage;
-import net.minecraft.world.poi.PointOfInterestType;
+import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PlayerManager {
@@ -28,6 +28,7 @@ public class PlayerManager {
     private final ServerPlayerEntity player;
     private final PortalManager portalManager;
     private HashMap<BlockPos,BlockState> sentBlocks = new HashMap<>();
+    private final List<UUID> hiddenEntities = new ArrayList<>();
 
     public PlayerManager(ServerPlayerEntity player) {
         this.player = player;
@@ -40,6 +41,8 @@ public class PlayerManager {
         ServerWorld destination = this.getDestination();
 
         HashMap<BlockPos,BlockState> newSentBlocks = new HashMap<>();
+
+        List<Entity> entities = this.getEntitiesInRange();
 
         //iterate through all portals
         portalManager.getPortals().forEach(portal -> {
@@ -69,6 +72,24 @@ public class PlayerManager {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
                 BlockPos pos1 = rect2.getBottomLeftBlockClamped(player.getPos(), SEND_LIMIT);
                 BlockPos pos2 = rect2.getTopRightBlockClamped(player.getPos(), SEND_LIMIT);
+
+                entities.removeIf((entity) -> {
+                    if (rect2.contains(entity.getPos())) {
+                        for (UUID uuid : hiddenEntities) {
+                            if (entity.getUuid().equals(uuid)) {
+                                return true; //cancel if the uuid is already in hiddenEntities
+                            }
+                        }
+                        //If we've reached this point. The entity isn't hidden yet. So we should hide it
+                        EntityPositionS2CPacket packet = new EntityPositionS2CPacket(entity);
+                        //noinspection ConstantConditions
+                        ((EntityPositionS2CPacketAccessor)packet).setY(-100);
+                        player.networkHandler.sendPacket(packet);
+                        hiddenEntities.add(entity.getUuid());
+                        return true;
+                    }
+                    return false;
+                });
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
                 BlockPos.iterate(pos1, pos2).forEach(pos -> {
@@ -102,7 +123,25 @@ public class PlayerManager {
             player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), serverWorld.getBlockState(pos)));
         });
 
+        entities.forEach(entity -> {
+            for (UUID uuid : hiddenEntities) {
+                if (entity.getUuid().equals(uuid)) {
+                    hiddenEntities.remove(uuid);
+                    player.networkHandler.sendPacket(new EntityPositionS2CPacket(entity));
+                    return;
+                }
+            }
+        });
+
         sentBlocks = newSentBlocks;
+    }
+
+    private List<Entity> getEntitiesInRange() {
+        ServerWorld world = player.getServerWorld();
+        return ChunkPos.stream(new ChunkPos(player.getBlockPos()), CursednessServer.PORTAL_RENDER_DISTANCE).flatMap((chunkPos) ->
+                Arrays.stream(world.getChunk(chunkPos.x,chunkPos.z).getEntitySectionArray()).flatMap(
+                        (Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream))
+                .collect(Collectors.toList());
     }
 
     private ServerWorld getDestination() {

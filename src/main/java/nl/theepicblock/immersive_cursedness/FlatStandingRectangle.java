@@ -6,6 +6,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 public class FlatStandingRectangle {
+    //Right is defined as the most positive point in whatever axis this is
     private final double top,bottom,left,right,other;
     private final Direction.Axis axis;
 
@@ -65,6 +66,15 @@ public class FlatStandingRectangle {
                 newOther,
                 this.axis
         );
+    }
+
+    public boolean contains(Vec3d pos) {
+        return  pos.y > this.bottom &&
+                pos.y < this.top &&
+                Util.get(pos, Util.rotate(axis)) > this.left &&
+                Util.get(pos, Util.rotate(axis)) < this.right &&
+                Util.get(pos, axis) < this.other+0.5 &&
+                Util.get(pos, axis) > this.other-0.5;
     }
 
     private Vec3d createVec3d(double y, double primaryAxis) {
