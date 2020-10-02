@@ -8,5 +8,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EntityPositionS2CPacketAccessor {
     @SuppressWarnings("AccessorTarget")
     @Accessor
+    void setX(double v);
+
+    @SuppressWarnings("AccessorTarget")
+    @Accessor
     void setY(double v);
 }

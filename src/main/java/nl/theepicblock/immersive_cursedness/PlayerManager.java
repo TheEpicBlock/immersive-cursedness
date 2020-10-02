@@ -35,6 +35,7 @@ public class PlayerManager {
         portalManager = new PortalManager();
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void tick(int tickCount) {
         if (tickCount % 30 == 0) {
             portalManager.update(player);
@@ -85,8 +86,8 @@ public class PlayerManager {
                         }
                         //If we've reached this point. The entity isn't hidden yet. So we should hide it
                         EntityPositionS2CPacket packet = new EntityPositionS2CPacket(entity);
-                        //noinspection ConstantConditions
-                        ((EntityPositionS2CPacketAccessor)packet).setY(10000);
+                        ((EntityPositionS2CPacketAccessor)packet).setX(entity.getX()+50);
+                        ((EntityPositionS2CPacketAccessor)packet).setY(Double.MAX_VALUE);
                         player.networkHandler.sendPacket(packet);
                         hiddenEntities.add(entity.getUuid());
                         return true;
