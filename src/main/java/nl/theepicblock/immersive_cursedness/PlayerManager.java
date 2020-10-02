@@ -86,7 +86,7 @@ public class PlayerManager {
                         //If we've reached this point. The entity isn't hidden yet. So we should hide it
                         EntityPositionS2CPacket packet = new EntityPositionS2CPacket(entity);
                         //noinspection ConstantConditions
-                        ((EntityPositionS2CPacketAccessor)packet).setY(-100);
+                        ((EntityPositionS2CPacketAccessor)packet).setY(10000);
                         player.networkHandler.sendPacket(packet);
                         hiddenEntities.add(entity.getUuid());
                         return true;
