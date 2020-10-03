@@ -36,6 +36,11 @@ public class DummyEntity extends Entity {
         return null;
     }
 
+    @Override
+    public void setYaw(float yaw) {
+        this.yaw = yaw;
+    }
+
     public TeleportTarget getTeleportTargetB(ServerWorld destination) {
         this.setInNetherPortal(this.getBlockPos());
         return this.getTeleportTarget(destination);
