@@ -25,7 +25,7 @@ public class CursednessServer {
     }
 
     public void start() {
-        System.out.println("Starting cursedness immersedness server");
+        System.out.println("Starting immersive cursedness thread");
         while (isServerActive) {
             if (System.currentTimeMillis() < nextTick) continue;
             try {
@@ -35,12 +35,12 @@ public class CursednessServer {
                 System.out.println("Exception occurred whilst ticking the immersive cursedness thread");
                 e.printStackTrace();
             }
-            nextTick = System.currentTimeMillis()+50;//todo change this to 50
+            nextTick = System.currentTimeMillis()+50;
         }
     }
 
     public void stop() {
-        System.out.println("Stopping cursedness immersedness server");
+        System.out.println("Stopping immersive cursedness thread");
         isServerActive = false;
     }
 
