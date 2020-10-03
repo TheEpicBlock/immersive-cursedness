@@ -77,6 +77,11 @@ public class FlatStandingRectangle {
                 Util.get(pos, axis) > this.other-0.5;
     }
 
+    public boolean isBeside(Vec3d pos) {
+        return  Util.get(pos, axis) < this.other+0.5 &&
+                Util.get(pos, axis) > this.other-0.5;
+    }
+
     private Vec3d createVec3d(double y, double primaryAxis) {
         if (axis == Direction.Axis.X) {
             return new Vec3d(other, y, primaryAxis);
@@ -87,9 +92,9 @@ public class FlatStandingRectangle {
 
     private BlockPos createBlockPos(double y, double primaryAxis) {
         if (axis == Direction.Axis.X) {
-            return new BlockPos(other, y, primaryAxis);
+            return Util.makeBlockPos(other, y, primaryAxis);
         } else {
-            return new BlockPos(primaryAxis, y, other);
+            return Util.makeBlockPos(primaryAxis, y, other);
         }
     }
 

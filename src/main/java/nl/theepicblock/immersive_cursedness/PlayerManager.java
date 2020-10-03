@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class PlayerManager {
     private final static int SEND_LIMIT = 31;
     private final static int SEND_LAYERS = 30;
-    private final static double ATMOSPHERE_DISTANCE = Math.pow(29,2);
+    private final static double ATMOSPHERE_DISTANCE = Math.pow(28,2);
     private final ServerPlayerEntity player;
     private final PortalManager portalManager;
     private HashMap<BlockPos,BlockState> sentBlocks = new HashMap<>();
@@ -48,6 +48,9 @@ public class PlayerManager {
         List<Entity> entities = this.getEntitiesInRange();
         if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
 
+        BlockState atmosphereBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
+        BlockState atmosphereBetweenBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
+
         //iterate through all portals
         portalManager.getPortals().forEach(portal -> {
             //get the corresponding location in the nether and make a TransformProfile
@@ -67,15 +70,14 @@ public class PlayerManager {
                 player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Blocks.AIR.getDefaultState()));
             });
 
-            BlockState atmosphereBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
-            BlockState atmosphereBetweenBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
-
             //iterate through all layers behind the portal
             FlatStandingRectangle rect = portal.toFlatStandingRectangle();
             for (int i = 1; i < SEND_LAYERS; i++) {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
                 BlockPos pos1 = rect2.getBottomLeftBlockClamped(player.getPos(), SEND_LIMIT);
                 BlockPos pos2 = rect2.getTopRightBlockClamped(player.getPos(), SEND_LIMIT);
+
+                if (Util.get(pos1, portal.getAxis()) == Util.get(pos2, portal.getAxis())) continue;
 
                 entities.removeIf((entity) -> {
                     if (rect2.contains(entity.getPos())) {
@@ -99,7 +101,7 @@ public class PlayerManager {
                 BlockPos.iterate(pos1, pos2).forEach(pos -> {
                     BlockPos imPos = pos.toImmutable();
 
-                    double dist = imPos.getSquaredDistance(player.getBlockPos());
+                    double dist = imPos.getSquaredDistance(portal.getLowerLeft());
                     if (dist > ATMOSPHERE_DISTANCE + 100) return;
 
                     BlockState ret;

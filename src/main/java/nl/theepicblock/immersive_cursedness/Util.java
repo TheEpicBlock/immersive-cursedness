@@ -7,6 +7,7 @@ import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.poi.PointOfInterest;
 
@@ -76,5 +77,9 @@ public class Util {
 
     public static void sendParticle(ServerPlayerEntity player, Vec3d pos) {
         player.networkHandler.sendPacket(new ParticleS2CPacket(new DustParticleEffect(0,1,0,1), true, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0));
+    }
+
+    public static BlockPos makeBlockPos(double x, double y, double z) {
+        return new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z));
     }
 }
