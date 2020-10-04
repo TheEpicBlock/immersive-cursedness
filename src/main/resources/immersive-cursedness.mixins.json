@@ -4,7 +4,8 @@
   "package": "nl.theepicblock.immersive_cursedness.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "EntityPositionS2CPacketAccessor"
+    "EntityPositionS2CPacketAccessor",
+    "ServerChunkManagerInvoker"
   ],
   "client": [
   ],

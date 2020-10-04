@@ -2,6 +2,7 @@ package nl.theepicblock.immersive_cursedness;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -55,9 +56,9 @@ public class TransformProfile {
         }
     }
 
-    public BlockState transformAndGetFromWorld(BlockPos pos, World world) {
+    public BlockState transformAndGetFromWorld(BlockPos pos, ServerWorld world) {
         BlockPos transformedPos = this.transform(pos);
-        BlockState state = world.getBlockState(transformedPos);
+        BlockState state = Util.getBlockAsync(world, transformedPos);
         return this.rotateState(state);
     }
 }

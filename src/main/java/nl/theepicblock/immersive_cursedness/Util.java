@@ -1,18 +1,19 @@
 package nl.theepicblock.immersive_cursedness;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.*;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.poi.PointOfInterest;
-
-import java.util.List;
-import java.util.stream.Stream;
+import nl.theepicblock.immersive_cursedness.mixin.ServerChunkManagerInvoker;
 
 public class Util {
     public static int follow(PointOfInterest[] list, BlockPos start, Direction direction) {
@@ -81,5 +82,12 @@ public class Util {
 
     public static BlockPos makeBlockPos(double x, double y, double z) {
         return new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z));
+    }
+
+    public static BlockState getBlockAsync(ServerWorld world, BlockPos pos) {
+        ServerChunkManagerInvoker chunkManager = (ServerChunkManagerInvoker)world.getChunkManager();
+
+        Either<Chunk,ChunkHolder.Unloaded> either = chunkManager.callGetChunkFuture(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false).join();
+        return either.left().map(chunk -> chunk.getBlockState(pos)).orElse(null);
     }
 }

@@ -130,7 +130,7 @@ public class PlayerManager {
         //get all of the old blocks and remove them
         sentBlocks.entrySet().removeIf(entry -> newSentBlocks.containsKey(entry.getKey()));
         sentBlocks.forEach((pos,i) -> {
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), serverWorld.getBlockState(pos)));
+            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Util.getBlockAsync(serverWorld, pos)));
         });
 
         entities.forEach(entity -> {
