@@ -59,6 +59,10 @@ public class PlayerManager {
             dummyEntity.setYaw(yaw);
             TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);
 
+            if (teleportTarget == null) {
+                return;
+            }
+
             TransformProfile transformProfile = new TransformProfile(
                     portal.getLowerLeft(),
                     new BlockPos(teleportTarget.position),
