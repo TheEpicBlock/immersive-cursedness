@@ -14,6 +14,8 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.WorldChunk;
 import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
 
 import java.util.*;
@@ -148,10 +150,17 @@ public class PlayerManager {
 
     private List<Entity> getEntitiesInRange() {
         ServerWorld world = player.getServerWorld();
-        return ChunkPos.stream(new ChunkPos(player.getBlockPos()), CursednessServer.PORTAL_RENDER_DISTANCE).flatMap((chunkPos) ->
-                Arrays.stream(world.getChunk(chunkPos.x,chunkPos.z).getEntitySectionArray()).flatMap(
-                        (Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream))
-                .collect(Collectors.toList());
+        return ChunkPos.stream(new ChunkPos(player.getBlockPos()), CursednessServer.PORTAL_RENDER_DISTANCE).flatMap((chunkPos) -> {
+            Optional<Chunk> chunkOptional = Util.getChunkAsync(world, chunkPos.x,chunkPos.z);
+            if (chunkOptional.isPresent()) {
+                Chunk chunk = chunkOptional.get();
+                if (chunk instanceof WorldChunk) {
+                    WorldChunk worldChunk = (WorldChunk)chunk;
+                    return Arrays.stream(worldChunk.getEntitySectionArray()).flatMap((Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream);
+                }
+            }
+            return Stream.empty();
+        }).collect(Collectors.toList());
     }
 
     private void removeNoLongerExistingEntities(List<Entity> existingEntities) {

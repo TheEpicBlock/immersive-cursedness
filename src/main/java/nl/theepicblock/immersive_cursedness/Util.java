@@ -15,6 +15,8 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.poi.PointOfInterest;
 import nl.theepicblock.immersive_cursedness.mixin.ServerChunkManagerInvoker;
 
+import java.util.Optional;
+
 public class Util {
     public static int follow(PointOfInterest[] list, BlockPos start, Direction direction) {
         for (int i = 1; i < 50; i++) {
@@ -85,9 +87,12 @@ public class Util {
     }
 
     public static BlockState getBlockAsync(ServerWorld world, BlockPos pos) {
-        ServerChunkManagerInvoker chunkManager = (ServerChunkManagerInvoker)world.getChunkManager();
+        return getChunkAsync(world, pos.getX() >> 4, pos.getZ() >> 4).map(chunk -> chunk.getBlockState(pos)).orElse(null);
+    }
 
-        Either<Chunk,ChunkHolder.Unloaded> either = chunkManager.callGetChunkFuture(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false).join();
-        return either.left().map(chunk -> chunk.getBlockState(pos)).orElse(null);
+    public static Optional<Chunk> getChunkAsync(ServerWorld world, int x, int z) {
+        ServerChunkManagerInvoker chunkManager = (ServerChunkManagerInvoker)world.getChunkManager();
+        Either<Chunk,ChunkHolder.Unloaded> either = chunkManager.callGetChunkFuture(x, z, ChunkStatus.FULL, false).join();
+        return either.left();
     }
 }
