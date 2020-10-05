@@ -6,11 +6,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(EntityPositionS2CPacket.class)
 public interface EntityPositionS2CPacketAccessor {
-    @SuppressWarnings("AccessorTarget")
-    @Accessor
+    @Accessor("x")
     void setX(double v);
 
-    @SuppressWarnings("AccessorTarget")
-    @Accessor
+    @Accessor("y")
     void setY(double v);
 }
