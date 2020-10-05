@@ -1,13 +1,12 @@
 {
-  "required": true,
+  "required": false,
   "minVersion": "0.8",
   "package": "nl.theepicblock.immersive_cursedness.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "EntityPositionS2CPacketAccessor",
+    "MixinPlayerEntity",
     "ServerChunkManagerInvoker"
-  ],
-  "client": [
   ],
   "injectors": {
     "defaultRequire": 1
