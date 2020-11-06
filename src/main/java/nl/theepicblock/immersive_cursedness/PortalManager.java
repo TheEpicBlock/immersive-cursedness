@@ -55,7 +55,8 @@ public class PortalManager {
                     lowerLeft = new BlockPos(portalP.getX(), lowestPoint, portalP.getZ()-leftOffset);
                 }
 
-                Portal p = new Portal(upperRight, lowerLeft, axis);
+                boolean hasCorners = hasCorners(world, upperRight, lowerLeft, axis);
+                Portal p = new Portal(upperRight, lowerLeft, axis, hasCorners);
                 this.portals.add(p);
 
                 BlockPos.iterate(upperRight,lowerLeft).forEach((pos) -> {
@@ -63,6 +64,31 @@ public class PortalManager {
                 });
             } catch (IllegalArgumentException ignored) {}
         }
+    }
+
+    private boolean hasCorners(ServerWorld world, BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis) {
+        int frameLeft = Util.get(lowerLeft, axis)-1;
+        int frameRight = Util.get(upperRight, axis)+1;
+        int frameTop = upperRight.getY()+1;
+        int frameBottom = lowerLeft.getY()-1;
+        int oppositeAxis = Util.get(upperRight, Util.rotate(axis));
+
+        BlockPos.Mutable mutPos = new BlockPos.Mutable();
+        Util.set(mutPos, oppositeAxis, Util.rotate(axis));
+
+        mutPos.setY(frameBottom);
+
+        Util.set(mutPos, frameLeft, axis);
+        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+        Util.set(mutPos, frameRight, axis);
+        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+
+        mutPos.setY(frameTop);
+        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+        Util.set(mutPos, frameRight, axis);
+        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+
+        return true;
     }
 
     private void garbageCollect(ServerPlayerEntity player) {

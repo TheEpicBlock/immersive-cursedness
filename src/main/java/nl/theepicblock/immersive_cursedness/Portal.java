@@ -11,11 +11,13 @@ public class Portal {
     private BlockPos upperRight;
     private BlockPos lowerLeft;
     private Direction.Axis axis;
+    private boolean hasCorners;
 
-    public Portal(BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis) {
+    public Portal(BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis, boolean hasCorners) {
         this.upperRight = upperRight;
         this.lowerLeft = lowerLeft;
         this.axis = axis;
+        this.hasCorners = hasCorners;
     }
 
     public double getDistance(BlockPos pos) {

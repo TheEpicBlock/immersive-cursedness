@@ -60,6 +60,16 @@ public class Util {
         }
     }
 
+    public static void set(BlockPos.Mutable b, int i, Direction.Axis axis) {
+        switch (axis) {
+            case X:
+                b.setX(i);
+            case Y:
+                b.setY(i);
+            case Z:
+                b.setZ(i);
+        }
+    }
 
     public static Direction.Axis rotate(Direction.Axis axis) {
         switch (axis) {
