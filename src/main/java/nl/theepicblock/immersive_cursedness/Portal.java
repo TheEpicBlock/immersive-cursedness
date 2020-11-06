@@ -65,14 +65,25 @@ public class Portal {
     }
 
     public FlatStandingRectangle toFlatStandingRectangle() {
-        return new FlatStandingRectangle(
-                this.getTop()+1.8,
-                this.getBottom()-0.8,
-                this.getLeft()-0.8,
-                this.getRight()+1.8,
-                Util.get(this.getUpperRight(),Util.rotate(axis)),
-                Util.rotate(axis)
-        );
+        if (this.hasCorners) {
+            return new FlatStandingRectangle(
+                    this.getTop()+1.8,
+                    this.getBottom()-0.8,
+                    this.getLeft()-0.8,
+                    this.getRight()+1.8,
+                    Util.get(this.getUpperRight(),Util.rotate(axis)),
+                    Util.rotate(axis)
+            );
+        } else {
+            return new FlatStandingRectangle(
+                    this.getTop()+0.5,
+                    this.getBottom()+0.5,
+                    this.getLeft()+0.5,
+                    this.getRight()+0.5,
+                    Util.get(this.getUpperRight(),Util.rotate(axis)),
+                    Util.rotate(axis)
+            );
+        }
     }
 
     public int getYawRelativeTo(BlockPos pos) {
