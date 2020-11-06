@@ -79,16 +79,20 @@ public class PortalManager {
         mutPos.setY(frameBottom);
 
         Util.set(mutPos, frameLeft, axis);
-        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+        if (isValidCornerBlock(world,mutPos)) return false;
         Util.set(mutPos, frameRight, axis);
-        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+        if (isValidCornerBlock(world,mutPos)) return false;
 
         mutPos.setY(frameTop);
-        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+        if (isValidCornerBlock(world,mutPos)) return false;
         Util.set(mutPos, frameRight, axis);
-        if (Util.getBlockAsync(world, mutPos).isAir()) return false;
+        if (isValidCornerBlock(world,mutPos)) return false;
 
         return true;
+    }
+
+    private boolean isValidCornerBlock(ServerWorld world, BlockPos pos) {
+        return Util.getBlockAsync(world, pos).isFullCube(world, pos);
     }
 
     private void garbageCollect(ServerPlayerEntity player) {
