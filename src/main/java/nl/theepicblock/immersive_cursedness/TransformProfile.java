@@ -48,9 +48,9 @@ public class TransformProfile {
             default:
                 return in;
             case 90:
-                return in.rotate(BlockRotation.CLOCKWISE_90);
-            case -90:
                 return in.rotate(BlockRotation.COUNTERCLOCKWISE_90);
+            case -90:
+                return in.rotate(BlockRotation.CLOCKWISE_90);
             case 180:
                 return in.rotate(BlockRotation.CLOCKWISE_180);
         }
