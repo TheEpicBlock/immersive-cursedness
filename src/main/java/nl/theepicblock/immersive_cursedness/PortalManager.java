@@ -77,16 +77,16 @@ public class PortalManager {
         Util.set(mutPos, oppositeAxis, Util.rotate(axis));
 
         mutPos.setY(frameBottom);
-
         Util.set(mutPos, frameLeft, axis);
-        if (isValidCornerBlock(world,mutPos)) return false;
+        if (!isValidCornerBlock(world,mutPos)) return false;
         Util.set(mutPos, frameRight, axis);
-        if (isValidCornerBlock(world,mutPos)) return false;
+        if (!isValidCornerBlock(world,mutPos)) return false;
 
         mutPos.setY(frameTop);
-        if (isValidCornerBlock(world,mutPos)) return false;
+        Util.set(mutPos, frameLeft, axis);
+        if (!isValidCornerBlock(world,mutPos)) return false;
         Util.set(mutPos, frameRight, axis);
-        if (isValidCornerBlock(world,mutPos)) return false;
+        if (!isValidCornerBlock(world,mutPos)) return false;
 
         return true;
     }

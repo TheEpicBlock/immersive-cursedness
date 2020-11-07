@@ -76,10 +76,10 @@ public class Portal {
             );
         } else {
             return new RectangleWithCutoutCorners(
-                    this.getTop()+0.5,
-                    this.getBottom()+0.5,
-                    this.getLeft()+0.5,
-                    this.getRight()+0.5,
+                    this.getTop()+1.5,
+                    this.getBottom()-0.5,
+                    this.getLeft()-0.5,
+                    this.getRight()+1.5,
                     Util.get(this.getUpperRight(),Util.rotate(axis)),
                     Util.rotate(axis)
             );

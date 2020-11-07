@@ -7,6 +7,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Collections;
+import java.util.Iterator;
 
 public class FlatStandingRectangle {
     //Right is defined as the most positive point in whatever axis this is
@@ -89,8 +90,8 @@ public class FlatStandingRectangle {
         BlockPos pos1 = this.getBottomLeftBlockClamped(center, limit);
         BlockPos pos2 = this.getTopRightBlockClamped(center, limit);
         Direction.Axis reverseAxis = Util.rotate(this.axis);
-        if (Util.get(pos1, reverseAxis) == Util.get(pos2, reverseAxis)) //noinspection unchecked
-            return (Iterable<BlockPos>)Collections.emptyIterator();
+        if (Util.get(pos1, reverseAxis) == Util.get(pos2, reverseAxis))
+            return Collections::emptyIterator;
 
         return BlockPos.iterate(pos1, pos2);
     }
