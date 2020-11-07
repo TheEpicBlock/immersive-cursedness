@@ -8,6 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.Iterator;
 
 public class RectangleWithCutoutCorners extends FlatStandingRectangle{
+	static private final double ERROR_MARGIN = 0.07D;
 	double percentageCornerWidth;
 	double percentageCornerHeight;
 
@@ -17,8 +18,8 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 
 	public RectangleWithCutoutCorners(double top, double bottom, double left, double right, double other, Direction.Axis axis, double singleCornerSizeInBlocks) {
 		super(top, bottom, left, right, other, axis);
-		percentageCornerHeight = singleCornerSizeInBlocks/(top-bottom);
-		percentageCornerWidth = singleCornerSizeInBlocks/(right-left);
+		percentageCornerHeight = singleCornerSizeInBlocks/(top-bottom)+ERROR_MARGIN;
+		percentageCornerWidth = singleCornerSizeInBlocks/(right-left)+ERROR_MARGIN;
 	}
 
 	public RectangleWithCutoutCorners(double top, double bottom, double left, double right, double other, Direction.Axis axis, double percentageCornerWidth, double percentageCornerHeight) {
@@ -53,7 +54,7 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 			double hPerc = (pos.y-this.bottom)/height;
 			double wPerc = (Util.get(pos, Util.rotate(axis))-this.left)/width;
 
-			return (hPerc>percentageCornerHeight&&hPerc<(height-percentageCornerHeight)) || (wPerc>percentageCornerWidth&&wPerc<(width-percentageCornerWidth));
+			return (hPerc>percentageCornerHeight&&hPerc<(1-percentageCornerHeight)) || (wPerc>percentageCornerWidth&&wPerc<(1-percentageCornerWidth));
 		}
 		return false;
 	}

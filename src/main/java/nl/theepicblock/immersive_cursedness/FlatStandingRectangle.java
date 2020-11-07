@@ -73,17 +73,17 @@ public class FlatStandingRectangle {
     }
 
     public boolean contains(Vec3d pos) {
-        return  pos.y > this.bottom &&
-                pos.y < this.top &&
-                Util.get(pos, Util.rotate(axis)) > this.left &&
-                Util.get(pos, Util.rotate(axis)) < this.right &&
-                Util.get(pos, axis) < this.other+0.5 &&
-                Util.get(pos, axis) > this.other-0.5;
+        return  pos.y >= this.bottom &&
+                pos.y <= this.top &&
+                Util.get(pos, Util.rotate(axis)) >= this.left &&
+                Util.get(pos, Util.rotate(axis)) <= this.right &&
+                Util.get(pos, axis) <= this.other+1 &&
+                Util.get(pos, axis) >= this.other;
     }
 
     public boolean isBeside(Vec3d pos) {
-        return  Util.get(pos, axis) < this.other+0.5 &&
-                Util.get(pos, axis) > this.other-0.5;
+        return  Util.get(pos, axis) < this.other+1 &&
+                Util.get(pos, axis) > this.other;
     }
 
     public Iterable<BlockPos> iterateClamped(Vec3d center, int limit) {
