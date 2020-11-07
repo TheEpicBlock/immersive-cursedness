@@ -1,14 +1,17 @@
 package nl.theepicblock.immersive_cursedness;
 
+import com.google.common.collect.Iterators;
 import com.google.common.primitives.Doubles;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Collections;
+
 public class FlatStandingRectangle {
     //Right is defined as the most positive point in whatever axis this is
-    private final double top,bottom,left,right,other;
-    private final Direction.Axis axis;
+    protected final double top,bottom,left,right,other;
+    protected final Direction.Axis axis;
 
     public FlatStandingRectangle(double top, double bottom, double left, double right, double other, Direction.Axis axis) {
         this.top = top;
@@ -80,6 +83,16 @@ public class FlatStandingRectangle {
     public boolean isBeside(Vec3d pos) {
         return  Util.get(pos, axis) < this.other+0.5 &&
                 Util.get(pos, axis) > this.other-0.5;
+    }
+
+    public Iterable<BlockPos> iterateClamped(Vec3d center, int limit) {
+        BlockPos pos1 = this.getBottomLeftBlockClamped(center, limit);
+        BlockPos pos2 = this.getTopRightBlockClamped(center, limit);
+        Direction.Axis reverseAxis = Util.rotate(this.axis);
+        if (Util.get(pos1, reverseAxis) == Util.get(pos2, reverseAxis)) //noinspection unchecked
+            return (Iterable<BlockPos>)Collections.emptyIterator();
+
+        return BlockPos.iterate(pos1, pos2);
     }
 
     private Vec3d createVec3d(double y, double primaryAxis) {

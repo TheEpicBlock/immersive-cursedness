@@ -96,6 +96,14 @@ public class Util {
         return new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z));
     }
 
+    public static Vec3d getCenter(BlockPos p) {
+        return new Vec3d(
+                p.getX()+0.5d,
+                p.getY()+0.5d,
+                p.getZ()+0.5d
+        );
+    }
+
     public static BlockState getBlockAsync(ServerWorld world, BlockPos pos) {
         return getChunkAsync(world, pos.getX() >> 4, pos.getZ() >> 4).map(chunk -> chunk.getBlockState(pos)).orElse(null);
     }

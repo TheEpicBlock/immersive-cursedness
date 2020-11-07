@@ -75,7 +75,7 @@ public class Portal {
                     Util.rotate(axis)
             );
         } else {
-            return new FlatStandingRectangle(
+            return new RectangleWithCutoutCorners(
                     this.getTop()+0.5,
                     this.getBottom()+0.5,
                     this.getLeft()+0.5,

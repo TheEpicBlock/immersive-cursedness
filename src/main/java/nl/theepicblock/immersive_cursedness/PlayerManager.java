@@ -80,10 +80,6 @@ public class PlayerManager {
             FlatStandingRectangle rect = portal.toFlatStandingRectangle();
             for (int i = 1; i < SEND_LAYERS; i++) {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
-                BlockPos pos1 = rect2.getBottomLeftBlockClamped(player.getPos(), SEND_LIMIT);
-                BlockPos pos2 = rect2.getTopRightBlockClamped(player.getPos(), SEND_LIMIT);
-
-                if (Util.get(pos1, portal.getAxis()) == Util.get(pos2, portal.getAxis())) continue;
 
                 entities.removeIf((entity) -> {
                     if (rect2.contains(entity.getPos())) {
@@ -104,7 +100,7 @@ public class PlayerManager {
                 });
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
-                BlockPos.iterate(pos1, pos2).forEach(pos -> {
+                rect2.iterateClamped(player.getPos(), SEND_LIMIT).forEach(pos -> {
                     BlockPos imPos = pos.toImmutable();
 
                     double dist = imPos.getSquaredDistance(portal.getLowerLeft());
