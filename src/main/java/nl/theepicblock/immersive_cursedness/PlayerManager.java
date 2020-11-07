@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PlayerManager {
-    private final static int SEND_LIMIT = 31;
+    private final static int SEND_LIMIT = 70;
     private final static int SEND_LAYERS = 30;
     private final static double ATMOSPHERE_DISTANCE = Math.pow(28,2);
     private final ServerPlayerEntity player;
@@ -103,6 +103,7 @@ public class PlayerManager {
                 rect2.iterateClamped(player.getPos(), SEND_LIMIT).forEach(pos -> {
                     BlockPos imPos = pos.toImmutable();
 
+
                     double dist = imPos.getSquaredDistance(portal.getLowerLeft());
                     if (dist > ATMOSPHERE_DISTANCE + 100) return;
 
@@ -115,6 +116,9 @@ public class PlayerManager {
                     } else {
                         ret = transformProfile.transformAndGetFromWorld(imPos, destination);
                     }
+
+                    if (imPos.getY() == 1) ret = atmosphereBetweenBlock;
+                    if (imPos.getY() == 0) ret = atmosphereBlock;
 
                     newSentBlocks.put(imPos, ret);
                     if (!(sentBlocks.get(pos) == ret)) {
