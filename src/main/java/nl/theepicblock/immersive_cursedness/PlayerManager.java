@@ -24,7 +24,7 @@ public class PlayerManager {
     private final Config config;
     private final ServerPlayerEntity player;
     private final PortalManager portalManager;
-    private HashMap<BlockPos,BlockState> sentBlocks = new HashMap<>();
+    private HashMap<BlockPos,BlockState> blockCache = new HashMap<>();
     private final List<UUID> hiddenEntities = new ArrayList<>();
 
     public PlayerManager(ServerPlayerEntity player, Config config) {
@@ -41,7 +41,7 @@ public class PlayerManager {
         ServerWorld serverWorld = this.player.getServerWorld();
         ServerWorld destination = Util.getDestination(player);
 
-        HashMap<BlockPos,BlockState> newSentBlocks = new HashMap<>();
+        List<FlatStandingRectangle> sentLayers = new ArrayList<>(blockCache.size());
 
         List<Entity> entities = this.getEntitiesInRange();
         if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
@@ -65,6 +65,7 @@ public class PlayerManager {
             FlatStandingRectangle rect = portal.toFlatStandingRectangle();
             for (int i = 1; i < config.portalDepth; i++) {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
+                sentLayers.add(rect2);
 
                 entities.removeIf((entity) -> {
                     if (rect2.contains(entity.getPos())) {
@@ -89,7 +90,6 @@ public class PlayerManager {
                     double dist = Util.getDistance(pos, portal.getLowerLeft());
                     if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 
-                    BlockPos imPos = pos.toImmutable();
                     BlockState ret;
 
                     if (dist > config.squaredAtmosphereRadius) {
@@ -97,14 +97,15 @@ public class PlayerManager {
                     } else if (dist > config.squaredAtmosphereRadiusMinusOne) {
                         ret = atmosphereBetweenBlock;
                     } else {
-                        ret = transformProfile.transformAndGetFromWorld(imPos, destination);
+                        ret = transformProfile.transformAndGetFromWorld(pos, destination);
                     }
 
-                    if (imPos.getY() == 1) ret = atmosphereBetweenBlock;
-                    if (imPos.getY() == 0) ret = atmosphereBlock;
+                    if (pos.getY() == 1) ret = atmosphereBetweenBlock;
+                    if (pos.getY() == 0) ret = atmosphereBlock;
 
-                    newSentBlocks.put(imPos, ret);
-                    if (!(sentBlocks.get(pos) == ret)) {
+                    BlockPos imPos = pos.toImmutable();
+                    if (!(blockCache.get(imPos) == ret)) {
+                        blockCache.put(imPos, ret);
                         player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
                     }
                 });
@@ -112,9 +113,15 @@ public class PlayerManager {
         });
 
         //get all of the old blocks and remove them
-        sentBlocks.entrySet().removeIf(entry -> newSentBlocks.containsKey(entry.getKey()));
-        sentBlocks.forEach((pos,i) -> {
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Util.getBlockAsync(serverWorld, pos)));
+        blockCache.entrySet().removeIf(entry -> {
+            BlockPos p = entry.getKey();
+            for (FlatStandingRectangle rect : sentLayers) {
+                if (rect.contains(p)) {
+                    return false;
+                }
+            }
+            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(p, Util.getBlockAsync(serverWorld, p)));
+            return true;
         });
 
         entities.forEach(entity -> {
@@ -126,8 +133,6 @@ public class PlayerManager {
                 }
             }
         });
-
-        sentBlocks = newSentBlocks;
     }
 
     private List<Entity> getEntitiesInRange() {
