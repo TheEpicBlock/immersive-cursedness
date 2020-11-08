@@ -57,10 +57,12 @@ public class PlayerManager {
             TransformProfile transformProfile = portal.getTransformProfile();
             if (transformProfile == null) return;
 
-            //replace the portal blocks in the center of the portal with air
-            BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Blocks.AIR.getDefaultState()));
-            });
+            if (tickCount % 40 == 0) {
+                //replace the portal blocks in the center of the portal with air
+                BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
+                    player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Blocks.AIR.getDefaultState()));
+                });
+            }
 
             //iterate through all layers behind the portal
             FlatStandingRectangle rect = portal.toFlatStandingRectangle();
