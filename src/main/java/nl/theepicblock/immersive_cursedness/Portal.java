@@ -8,11 +8,11 @@ import javax.sound.sampled.Port;
 
 public class Portal {
     //Right is defined as the most positive point in whatever axis this is
-    private BlockPos upperRight;
-    private BlockPos lowerLeft;
-    private Direction.Axis axis;
-    private boolean hasCorners;
-    private TransformProfile transformProfile;
+    private final BlockPos upperRight;
+    private final BlockPos lowerLeft;
+    private final Direction.Axis axis;
+    private final boolean hasCorners;
+    private final TransformProfile transformProfile;
 
     public Portal(BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis, boolean hasCorners, TransformProfile transformProfile) {
         this.upperRight = upperRight;

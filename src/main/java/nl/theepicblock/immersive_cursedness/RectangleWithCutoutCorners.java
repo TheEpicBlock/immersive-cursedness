@@ -9,8 +9,8 @@ import java.util.Iterator;
 
 public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	static private final double ERROR_MARGIN = 0.25D;
-	double percentageCornerWidth;
-	double percentageCornerHeight;
+	final double percentageCornerWidth;
+	final double percentageCornerHeight;
 
 	public RectangleWithCutoutCorners(double top, double bottom, double left, double right, double other, Direction.Axis axis) {
 		this(top, bottom, left, right, other, axis, 0.5D);
