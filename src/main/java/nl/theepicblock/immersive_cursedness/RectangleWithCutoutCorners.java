@@ -5,6 +5,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	static private final double ERROR_MARGIN = 0.25D;
 	final double percentageCornerWidth;
@@ -58,9 +62,11 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	}
 
 	@Override
-	public Iterable<BlockPos> iterateClamped(Vec3d center, int limit) {
-		return Iterables.filter(super.iterateClamped(center, limit), (blockPos) -> {
-			return contains(Util.getCenter(blockPos));
+	public void iterateClamped(Vec3d center, int limit, Consumer<BlockPos> predicate) {
+		super.iterateClamped(center, limit, (pos) -> {
+			if (this.contains(Util.getCenter(pos))) {
+				predicate.accept(pos);
+			}
 		});
 	}
 }

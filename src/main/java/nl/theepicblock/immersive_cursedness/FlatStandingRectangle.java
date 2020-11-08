@@ -5,6 +5,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class FlatStandingRectangle {
     //Right is defined as the most positive point in whatever axis this is
@@ -83,14 +85,26 @@ public class FlatStandingRectangle {
                 Util.get(pos, axis) > this.other;
     }
 
-    public Iterable<BlockPos> iterateClamped(Vec3d center, int limit) {
-        BlockPos pos1 = this.getBottomLeftBlockClamped(center, limit);
-        BlockPos pos2 = this.getTopRightBlockClamped(center, limit);
-        Direction.Axis reverseAxis = Util.rotate(this.axis);
-        if (Util.get(pos1, reverseAxis) == Util.get(pos2, reverseAxis))
-            return Collections::emptyIterator;
+    public void iterateClamped(Vec3d center, int limit, Consumer<BlockPos> predicate) {
+        double centerP = Util.get(center, Util.rotate(axis));
+        int left = (int)Math.round(clamp(this.left,centerP-limit,centerP+limit));
+        int right = (int)Math.round(clamp(this.right-1,centerP-limit,centerP+limit));
+        int top = (int)Math.round(clamp(this.top-1,0,255));
+        int bottom = (int)Math.round(clamp(this.bottom,0,255));
 
-        return BlockPos.iterate(pos1, pos2);
+        if (left == right) return;
+
+        Direction.Axis otherAxis = Util.rotate(axis);
+        BlockPos.Mutable mutPos = new BlockPos.Mutable();
+        Util.set(mutPos, (int)Math.round(other), axis);
+
+        for (int y = bottom; y <= top; y++) {
+            mutPos.setY(y);
+            for (int o = left; o <= right; o++) {
+                Util.set(mutPos, o, otherAxis);
+                predicate.accept(mutPos);
+            }
+        }
     }
 
     private Vec3d createVec3d(double y, double primaryAxis) {

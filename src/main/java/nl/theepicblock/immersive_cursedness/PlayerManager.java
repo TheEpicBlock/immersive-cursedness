@@ -85,12 +85,11 @@ public class PlayerManager {
                 });
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
-                for (BlockPos pos : rect2.iterateClamped(player.getPos(), config.horizontalSendLimit)) {
+                rect2.iterateClamped(player.getPos(), config.horizontalSendLimit, (pos) -> {
                     BlockPos imPos = pos.toImmutable();
 
-
                     double dist = imPos.getSquaredDistance(portal.getLowerLeft());
-                    if (dist > config.squaredAtmosphereRadiusPlusOne) continue;
+                    if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 
                     BlockState ret;
 
@@ -109,9 +108,8 @@ public class PlayerManager {
                     if (!(sentBlocks.get(pos) == ret)) {
                         player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
                     }
-                }
+                });
             }
-
         });
 
         //get all of the old blocks and remove them
