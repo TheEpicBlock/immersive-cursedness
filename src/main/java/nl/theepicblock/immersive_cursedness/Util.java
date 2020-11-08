@@ -6,10 +6,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.poi.PointOfInterest;
@@ -115,5 +118,12 @@ public class Util {
         ServerChunkManagerInvoker chunkManager = (ServerChunkManagerInvoker)world.getChunkManager();
         Either<Chunk,ChunkHolder.Unloaded> either = chunkManager.callGetChunkFuture(x, z, ChunkStatus.FULL, false).join();
         return either.left();
+    }
+
+    public static ServerWorld getDestination(ServerPlayerEntity player) {
+        ServerWorld serverWorld = player.getServerWorld();
+        MinecraftServer minecraftServer = serverWorld.getServer();
+        RegistryKey<World> registryKey = serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER;
+        return minecraftServer.getWorld(registryKey);
     }
 }

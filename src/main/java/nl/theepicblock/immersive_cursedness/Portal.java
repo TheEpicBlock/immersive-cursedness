@@ -12,12 +12,14 @@ public class Portal {
     private BlockPos lowerLeft;
     private Direction.Axis axis;
     private boolean hasCorners;
+    private TransformProfile transformProfile;
 
-    public Portal(BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis, boolean hasCorners) {
+    public Portal(BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis, boolean hasCorners, TransformProfile transformProfile) {
         this.upperRight = upperRight;
         this.lowerLeft = lowerLeft;
         this.axis = axis;
         this.hasCorners = hasCorners;
+        this.transformProfile = transformProfile;
     }
 
     public double getDistance(BlockPos pos) {
@@ -46,6 +48,10 @@ public class Portal {
 
     public Direction.Axis getAxis() {
         return axis;
+    }
+
+    public TransformProfile getTransformProfile() {
+        return transformProfile;
     }
 
     public int getLeft() {

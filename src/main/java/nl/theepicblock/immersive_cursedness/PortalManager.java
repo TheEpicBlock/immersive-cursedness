@@ -5,11 +5,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.TeleportTarget;
+import net.minecraft.world.World;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import net.minecraft.world.poi.PointOfInterestType;
@@ -39,6 +43,8 @@ public class PortalManager {
         checked.clear();
         this.portals.clear();
 
+        ServerWorld destination = Util.getDestination(player);
+
         for (PointOfInterest portal : portals) {
             try {
                 BlockPos portalP = portal.getPos();
@@ -63,7 +69,8 @@ public class PortalManager {
                 }
 
                 boolean hasCorners = hasCorners(world, upperRight, lowerLeft, axis);
-                Portal p = new Portal(upperRight, lowerLeft, axis, hasCorners);
+                TransformProfile transformProfile = createTransformProfile(lowerLeft, destination);
+                Portal p = new Portal(upperRight, lowerLeft, axis, hasCorners, transformProfile);
                 this.portals.add(p);
 
                 BlockPos.iterate(upperRight,lowerLeft).forEach((pos) -> {
@@ -73,7 +80,7 @@ public class PortalManager {
         }
     }
 
-    private boolean hasCorners(ServerWorld world, BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis) {
+    private static boolean hasCorners(ServerWorld world, BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis) {
         int frameLeft = Util.get(lowerLeft, axis)-1;
         int frameRight = Util.get(upperRight, axis)+1;
         int frameTop = upperRight.getY()+1;
@@ -98,8 +105,24 @@ public class PortalManager {
         return true;
     }
 
-    private boolean isValidCornerBlock(ServerWorld world, BlockPos pos) {
+    private static boolean isValidCornerBlock(ServerWorld world, BlockPos pos) {
         return Util.getBlockAsync(world, pos).isFullCube(world, pos);
+    }
+
+    private TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
+        DummyEntity dummyEntity = new DummyEntity(player.getServerWorld(), pos);
+        dummyEntity.setYaw(0);
+        TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);
+
+        if (teleportTarget == null) {
+            return null;
+        }
+
+        return new TransformProfile(
+                pos,
+                new BlockPos(teleportTarget.position),
+                0,
+                (int)teleportTarget.yaw);
     }
 
     private void garbageCollect(ServerPlayerEntity player) {

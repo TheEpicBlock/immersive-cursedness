@@ -42,7 +42,7 @@ public class PlayerManager {
             portalManager.update();
         }
         ServerWorld serverWorld = this.player.getServerWorld();
-        ServerWorld destination = this.getDestination();
+        ServerWorld destination = Util.getDestination(player);
 
         HashMap<BlockPos,BlockState> newSentBlocks = new HashMap<>();
 
@@ -54,21 +54,8 @@ public class PlayerManager {
 
         //iterate through all portals
         portalManager.getPortals().forEach(portal -> {
-            //get the corresponding location in the nether and make a TransformProfile
-            int yaw = portal.getYawRelativeTo(player.getBlockPos());
-            DummyEntity dummyEntity = new DummyEntity(serverWorld, portal.getLowerLeft());
-            dummyEntity.setYaw(yaw);
-            TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);
-
-            if (teleportTarget == null) {
-                return;
-            }
-
-            TransformProfile transformProfile = new TransformProfile(
-                    portal.getLowerLeft(),
-                    new BlockPos(teleportTarget.position),
-                    yaw,
-                    (int)teleportTarget.yaw);
+            TransformProfile transformProfile = portal.getTransformProfile();
+            if (transformProfile == null) return;
 
             //replace the portal blocks in the center of the portal with air
             BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
@@ -165,12 +152,5 @@ public class PlayerManager {
     private void removeNoLongerExistingEntities(List<Entity> existingEntities) {
         hiddenEntities.removeIf((uuid) ->
                 existingEntities.stream().noneMatch(entity -> uuid.equals(entity.getUuid())));
-    }
-
-    private ServerWorld getDestination() {
-        ServerWorld serverWorld = this.player.getServerWorld();
-        MinecraftServer minecraftServer = serverWorld.getServer();
-        RegistryKey<World> registryKey = serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER;
-        return minecraftServer.getWorld(registryKey);
     }
 }
