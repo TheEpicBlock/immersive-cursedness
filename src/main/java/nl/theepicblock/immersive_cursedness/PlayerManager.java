@@ -86,11 +86,10 @@ public class PlayerManager {
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
                 rect2.iterateClamped(player.getPos(), config.horizontalSendLimit, (pos) -> {
-                    BlockPos imPos = pos.toImmutable();
-
-                    double dist = imPos.getSquaredDistance(portal.getLowerLeft());
+                    double dist = Util.getDistance(pos, portal.getLowerLeft());
                     if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 
+                    BlockPos imPos = pos.toImmutable();
                     BlockState ret;
 
                     if (dist > config.squaredAtmosphereRadius) {

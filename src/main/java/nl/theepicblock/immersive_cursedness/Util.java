@@ -126,4 +126,20 @@ public class Util {
         RegistryKey<World> registryKey = serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER;
         return minecraftServer.getWorld(registryKey);
     }
+
+    /**
+     * Normally 0.5 gets added to the distance of blockpos. This method doesn't do that.
+     * @see Vec3i#getSquaredDistance(double, double, double, boolean)
+     */
+    public static double getDistance(BlockPos a, BlockPos b) {
+        int x = a.getX() - b.getX();
+        int y = a.getY() - b.getY();
+        int z = a.getZ() - b.getZ();
+
+        double xx = (double)x*(double)x;
+        double yy = (double)y*(double)y;
+        double zz = (double)z*(double)z;
+
+        return xx + yy + zz;
+    }
 }
