@@ -1,13 +1,10 @@
 package nl.theepicblock.immersive_cursedness;
 
-import com.google.common.collect.Iterators;
-import com.google.common.primitives.Doubles;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Collections;
-import java.util.Iterator;
 
 public class FlatStandingRectangle {
     //Right is defined as the most positive point in whatever axis this is

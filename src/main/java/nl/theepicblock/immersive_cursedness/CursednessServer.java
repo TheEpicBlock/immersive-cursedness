@@ -1,17 +1,12 @@
 package nl.theepicblock.immersive_cursedness;
 
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import net.minecraft.block.Blocks;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CursednessServer {
     private final MinecraftServer server;

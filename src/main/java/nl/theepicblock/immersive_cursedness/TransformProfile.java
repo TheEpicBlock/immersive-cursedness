@@ -1,12 +1,9 @@
 package nl.theepicblock.immersive_cursedness;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class TransformProfile {
     private final ImPos transform;
