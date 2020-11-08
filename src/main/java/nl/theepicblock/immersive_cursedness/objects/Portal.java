@@ -1,7 +1,8 @@
-package nl.theepicblock.immersive_cursedness;
+package nl.theepicblock.immersive_cursedness.objects;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import nl.theepicblock.immersive_cursedness.Util;
 
 public class Portal {
     //Right is defined as the most positive point in whatever axis this is

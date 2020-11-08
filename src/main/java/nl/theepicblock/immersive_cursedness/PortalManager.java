@@ -11,6 +11,9 @@ import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import net.minecraft.world.poi.PointOfInterestType;
+import nl.theepicblock.immersive_cursedness.objects.DummyEntity;
+import nl.theepicblock.immersive_cursedness.objects.Portal;
+import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;

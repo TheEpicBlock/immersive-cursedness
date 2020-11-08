@@ -1,13 +1,11 @@
-package nl.theepicblock.immersive_cursedness;
+package nl.theepicblock.immersive_cursedness.objects;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import nl.theepicblock.immersive_cursedness.Util;
 
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	static private final double ERROR_MARGIN = 0.25D;

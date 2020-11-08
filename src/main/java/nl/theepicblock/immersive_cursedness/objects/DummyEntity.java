@@ -1,4 +1,4 @@
-package nl.theepicblock.immersive_cursedness;
+package nl.theepicblock.immersive_cursedness.objects;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

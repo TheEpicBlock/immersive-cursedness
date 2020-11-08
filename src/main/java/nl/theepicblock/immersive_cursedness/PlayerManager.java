@@ -14,6 +14,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
 import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
+import nl.theepicblock.immersive_cursedness.objects.FlatStandingRectangle;
+import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
 
 import java.util.*;
 import java.util.function.Function;
