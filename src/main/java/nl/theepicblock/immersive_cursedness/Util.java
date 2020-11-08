@@ -3,6 +3,7 @@ package nl.theepicblock.immersive_cursedness;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
@@ -110,8 +111,11 @@ public class Util {
         );
     }
 
+    private static final BlockState AIR = Blocks.AIR.getDefaultState();
     public static BlockState getBlockAsync(ServerWorld world, BlockPos pos) {
-        return getChunkAsync(world, pos.getX() >> 4, pos.getZ() >> 4).map(chunk -> chunk.getBlockState(pos)).orElse(null);
+        Optional<Chunk> chunkOptional = getChunkAsync(world, pos.getX() >> 4, pos.getZ() >> 4);
+        if (!chunkOptional.isPresent()) return AIR;
+        return chunkOptional.get().getBlockState(pos);
     }
 
     public static Optional<Chunk> getChunkAsync(ServerWorld world, int x, int z) {
