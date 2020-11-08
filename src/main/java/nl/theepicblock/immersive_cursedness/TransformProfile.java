@@ -9,13 +9,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class TransformProfile {
-    private final BlockPos transform;
-    private final BlockPos target;
+    private final ImPos transform;
+    private final ImPos target;
     private final int rotation;
 
     public TransformProfile(BlockPos original, BlockPos target, int originalRot, int targetRot) {
-        this.transform = target.subtract(original);
-        this.target = target;
+        this.transform = new ImPos(target.subtract(original));
+        this.target = new ImPos(target);
         int rotation = targetRot-originalRot;
         if (rotation == -270) rotation = 90;
         if (rotation == 270) rotation = -90;
@@ -24,22 +24,25 @@ public class TransformProfile {
     }
 
     public BlockPos transform(BlockPos in) {
-        BlockPos ret = in.add(transform);
-        ret = ret.subtract(target);
-        ret = rotate(ret);
-        return ret.add(target);
+        ImPos pos = new ImPos(
+                in.getX()+transform.getX()-target.getX(),
+                in.getY()+transform.getY()-target.getY(),
+                in.getZ()+transform.getZ()-target.getZ()
+        );
+        pos = rotate(pos);
+        return pos.addIntoBlockPos(target);
     }
 
-    public BlockPos rotate(BlockPos in) {
+    public ImPos rotate(ImPos in) {
         switch (rotation) {
             default:
                 return in;
             case 90:
-                return new BlockPos(-in.getZ(), in.getY(), in.getX());
+                return new ImPos(-in.getZ(), in.getY(), in.getX());
             case -90:
-                return new BlockPos(in.getZ(), in.getY(), -in.getX());
+                return new ImPos(in.getZ(), in.getY(), -in.getX());
             case 180:
-                return new BlockPos(-in.getZ(), in.getY(), -in.getX());
+                return new ImPos(-in.getZ(), in.getY(), -in.getX());
         }
     }
 
@@ -60,5 +63,37 @@ public class TransformProfile {
         BlockPos transformedPos = this.transform(pos);
         BlockState state = Util.getBlockAsync(world, transformedPos);
         return this.rotateState(state);
+    }
+
+    private static class ImPos {
+        final private int x;
+        final private int y;
+        final private int z;
+
+        public ImPos(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public ImPos(BlockPos p) {
+            this(p.getX(), p.getY(), p.getZ());
+        }
+
+        public BlockPos addIntoBlockPos(ImPos v) {
+            return new BlockPos(x+v.x,y+v.y,z+v.z);
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public int getZ() {
+            return z;
+        }
     }
 }
