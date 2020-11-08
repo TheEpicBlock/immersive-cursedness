@@ -22,11 +22,18 @@ import java.util.stream.Stream;
 public class PortalManager {
     private final ArrayList<BlockPos> checked = new ArrayList<>();
     private final ArrayList<Portal> portals = new ArrayList<>();
+    private final ServerPlayerEntity player;
+    private final Config config;
 
-    public void update(ServerPlayerEntity player) {
+    public PortalManager(ServerPlayerEntity player, Config config) {
+        this.player = player;
+        this.config = config;
+    }
+
+    public void update() {
         ServerWorld world = player.getServerWorld();
 
-        Stream<PointOfInterest> portalStream = getPortalsInChunkRadius(world.getPointOfInterestStorage(), player.getBlockPos(), CursednessServer.PORTAL_RENDER_DISTANCE);
+        Stream<PointOfInterest> portalStream = getPortalsInChunkRadius(world.getPointOfInterestStorage(), player.getBlockPos(), config.renderDistance);
         PointOfInterest[] portals = portalStream.toArray(PointOfInterest[]::new);
 
         checked.clear();
@@ -97,7 +104,7 @@ public class PortalManager {
 
     private void garbageCollect(ServerPlayerEntity player) {
         portals.removeIf(portal ->
-            portal.getDistance(player.getBlockPos()) > CursednessServer.PORTAL_RENDER_DISTANCE*16
+            portal.getDistance(player.getBlockPos()) > config.renderDistance*16
         );
         portals.removeIf(portal -> {
             for (Portal portal1 : portals) {
@@ -111,7 +118,7 @@ public class PortalManager {
         return portals;
     }
 
-    private Stream<PointOfInterest> getPortalsInChunkRadius(PointOfInterestStorage storage, BlockPos pos, int radius) {
+    private static Stream<PointOfInterest> getPortalsInChunkRadius(PointOfInterestStorage storage, BlockPos pos, int radius) {
         return ChunkPos.stream(new ChunkPos(pos), radius).flatMap((chunkPos) -> {
             return storage.getInChunk((poi) -> poi == PointOfInterestType.NETHER_PORTAL, chunkPos, PointOfInterestStorage.OccupationStatus.ANY);
         });

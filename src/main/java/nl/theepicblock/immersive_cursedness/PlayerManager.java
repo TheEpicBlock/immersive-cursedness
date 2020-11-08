@@ -24,23 +24,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PlayerManager {
-    private final static int SEND_LIMIT = 70;
-    private final static int SEND_LAYERS = 30;
-    private final static double ATMOSPHERE_DISTANCE = Math.pow(28,2);
+    private final Config config;
     private final ServerPlayerEntity player;
     private final PortalManager portalManager;
     private HashMap<BlockPos,BlockState> sentBlocks = new HashMap<>();
     private final List<UUID> hiddenEntities = new ArrayList<>();
 
-    public PlayerManager(ServerPlayerEntity player) {
+    public PlayerManager(ServerPlayerEntity player, Config config) {
         this.player = player;
-        portalManager = new PortalManager();
+        portalManager = new PortalManager(player, config);
+        this.config = config;
     }
 
     @SuppressWarnings("ConstantConditions")
     public void tick(int tickCount) {
         if (tickCount % 30 == 0) {
-            portalManager.update(player);
+            portalManager.update();
         }
         ServerWorld serverWorld = this.player.getServerWorld();
         ServerWorld destination = this.getDestination();
@@ -78,7 +77,7 @@ public class PlayerManager {
 
             //iterate through all layers behind the portal
             FlatStandingRectangle rect = portal.toFlatStandingRectangle();
-            for (int i = 1; i < SEND_LAYERS; i++) {
+            for (int i = 1; i < config.portalDepth; i++) {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
 
                 entities.removeIf((entity) -> {
@@ -100,18 +99,18 @@ public class PlayerManager {
                 });
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
-                rect2.iterateClamped(player.getPos(), SEND_LIMIT).forEach(pos -> {
+                rect2.iterateClamped(player.getPos(), config.horizontalSendLimit).forEach(pos -> {
                     BlockPos imPos = pos.toImmutable();
 
 
                     double dist = imPos.getSquaredDistance(portal.getLowerLeft());
-                    if (dist > ATMOSPHERE_DISTANCE + 100) return;
+                    if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 
                     BlockState ret;
 
-                    if (dist > ATMOSPHERE_DISTANCE) {
+                    if (dist > config.squaredAtmosphereRadius) {
                         ret = atmosphereBlock;
-                    } else if (dist > ATMOSPHERE_DISTANCE - 100) {
+                    } else if (dist > config.squaredAtmosphereRadiusMinusOne) {
                         ret = atmosphereBetweenBlock;
                     } else {
                         ret = transformProfile.transformAndGetFromWorld(imPos, destination);
@@ -150,7 +149,7 @@ public class PlayerManager {
 
     private List<Entity> getEntitiesInRange() {
         ServerWorld world = player.getServerWorld();
-        return ChunkPos.stream(new ChunkPos(player.getBlockPos()), CursednessServer.PORTAL_RENDER_DISTANCE).flatMap((chunkPos) -> {
+        return ChunkPos.stream(new ChunkPos(player.getBlockPos()), config.renderDistance).flatMap((chunkPos) -> {
             Optional<Chunk> chunkOptional = Util.getChunkAsync(world, chunkPos.x,chunkPos.z);
             if (chunkOptional.isPresent()) {
                 Chunk chunk = chunkOptional.get();

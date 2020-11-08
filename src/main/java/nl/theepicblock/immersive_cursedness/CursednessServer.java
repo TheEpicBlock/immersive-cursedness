@@ -1,5 +1,6 @@
 package nl.theepicblock.immersive_cursedness;
 
+import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -13,12 +14,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CursednessServer {
-    public static final int PORTAL_RENDER_DISTANCE = 3; //measured in chunks
     private final MinecraftServer server;
     private volatile boolean isServerActive = true;
     private long nextTick;
     private int tickCount;
     private final Map<ServerPlayerEntity, PlayerManager> playerManagers = new HashMap<>();
+    private final Config config = AutoConfig.getConfigHolder(Config.class).getConfig();
 
     public CursednessServer(MinecraftServer server) {
         this.server = server;
@@ -51,7 +52,7 @@ public class CursednessServer {
         playerManagers.entrySet().removeIf(i -> !playerList.contains(i.getKey()));
         for (ServerPlayerEntity player : playerList) {
             if (!playerManagers.containsKey(player)) {
-                playerManagers.put(player, new PlayerManager(player));
+                playerManagers.put(player, new PlayerManager(player, config));
             }
         }
 
