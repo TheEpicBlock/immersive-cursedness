@@ -8,7 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.Iterator;
 
 public class RectangleWithCutoutCorners extends FlatStandingRectangle{
-	static private final double ERROR_MARGIN = 0.07D;
+	static private final double ERROR_MARGIN = 0.25D;
 	double percentageCornerWidth;
 	double percentageCornerHeight;
 
@@ -18,8 +18,8 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 
 	public RectangleWithCutoutCorners(double top, double bottom, double left, double right, double other, Direction.Axis axis, double singleCornerSizeInBlocks) {
 		super(top, bottom, left, right, other, axis);
-		percentageCornerHeight = singleCornerSizeInBlocks/(top-bottom)+ERROR_MARGIN;
-		percentageCornerWidth = singleCornerSizeInBlocks/(right-left)+ERROR_MARGIN;
+		percentageCornerHeight = (singleCornerSizeInBlocks+ERROR_MARGIN)/(top-bottom);
+		percentageCornerWidth = (singleCornerSizeInBlocks+ERROR_MARGIN)/(right-left);
 	}
 
 	public RectangleWithCutoutCorners(double top, double bottom, double left, double right, double other, Direction.Axis axis, double percentageCornerWidth, double percentageCornerHeight) {
