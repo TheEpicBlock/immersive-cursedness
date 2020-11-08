@@ -64,10 +64,13 @@ public class Util {
         switch (axis) {
             case X:
                 b.setX(i);
+                break;
             case Y:
                 b.setY(i);
+                break;
             case Z:
                 b.setZ(i);
+                break;
         }
     }
 
