@@ -8,7 +8,7 @@ import nl.theepicblock.immersive_cursedness.Util;
 import java.util.function.Consumer;
 
 public class RectangleWithCutoutCorners extends FlatStandingRectangle{
-	static private final double ERROR_MARGIN = 0.25D;
+	static private final double ERROR_MARGIN = 0.15D;
 	final double percentageCornerWidth;
 	final double percentageCornerHeight;
 
