@@ -14,6 +14,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
 import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
+import nl.theepicblock.immersive_cursedness.objects.BlockCache;
+import nl.theepicblock.immersive_cursedness.objects.Chunk2IntMap;
 import nl.theepicblock.immersive_cursedness.objects.FlatStandingRectangle;
 import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
 
@@ -26,7 +28,7 @@ public class PlayerManager {
     private final Config config;
     private final ServerPlayerEntity player;
     private final PortalManager portalManager;
-    private HashMap<BlockPos,BlockState> blockCache = new HashMap<>();
+    private BlockCache blockCache = new BlockCache();
     private final List<UUID> hiddenEntities = new ArrayList<>();
 
     public PlayerManager(ServerPlayerEntity player, Config config) {
@@ -44,6 +46,7 @@ public class PlayerManager {
         ServerWorld destination = Util.getDestination(player);
 
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(blockCache.size());
+        Chunk2IntMap sentBlocks = new Chunk2IntMap();
 
         List<Entity> entities = this.getEntitiesInRange();
         if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
@@ -106,6 +109,7 @@ public class PlayerManager {
                     if (pos.getY() == 0) ret = atmosphereBlock;
 
                     BlockPos imPos = pos.toImmutable();
+                    sentBlocks.increment(imPos);
                     if (!(blockCache.get(imPos) == ret)) {
                         blockCache.put(imPos, ret);
                         player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
@@ -115,15 +119,8 @@ public class PlayerManager {
         });
 
         //get all of the old blocks and remove them
-        blockCache.entrySet().removeIf(entry -> {
-            BlockPos p = entry.getKey();
-            for (FlatStandingRectangle rect : sentLayers) {
-                if (rect.contains(p)) {
-                    return false;
-                }
-            }
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(p, Util.getBlockAsync(serverWorld, p)));
-            return true;
+        blockCache.purge(sentBlocks, sentLayers, (pos) -> {
+            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, Util.getBlockAsync(serverWorld, pos)));
         });
 
         entities.forEach(entity -> {
