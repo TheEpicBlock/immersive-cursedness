@@ -60,6 +60,19 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	}
 
 	@Override
+	public boolean contains(BlockPos pos) {
+		if (super.contains(pos)) {
+			double height = (this.top-this.bottom);
+			double width = (this.right-this.left);
+			double hPerc = (pos.getY()+0.5-this.bottom)/height;
+			double wPerc = (Util.get(pos, Util.rotate(axis))+0.5-this.left)/width;
+
+			return (hPerc>percentageCornerHeight&&hPerc<(1-percentageCornerHeight)) || (wPerc>percentageCornerWidth&&wPerc<(1-percentageCornerWidth));
+		}
+		return false;
+	}
+
+	@Override
 	public void iterateClamped(Vec3d center, int limit, Consumer<BlockPos> predicate) {
 		super.iterateClamped(center, limit, (pos) -> {
 			if (this.contains(Util.getCenter(pos))) {
