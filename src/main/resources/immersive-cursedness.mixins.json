@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "EntityPositionS2CPacketAccessor",
+    "MixinInteractionManager",
     "MixinPlayerEntity",
+    "MixinServerPlayerEntity",
+    "PlayerActionC2SMixin",
     "ServerChunkManagerInvoker"
   ],
   "injectors": {

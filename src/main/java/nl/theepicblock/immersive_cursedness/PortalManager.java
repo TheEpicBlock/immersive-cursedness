@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 public class PortalManager {
     private final ArrayList<BlockPos> checked = new ArrayList<>();
-    private final ArrayList<Portal> portals = new ArrayList<>();
+    private ArrayList<Portal> portals = new ArrayList<>();
     private final ServerPlayerEntity player;
     private final Config config;
 
@@ -36,7 +36,7 @@ public class PortalManager {
         PointOfInterest[] portals = portalStream.toArray(PointOfInterest[]::new);
 
         checked.clear();
-        this.portals.clear();
+        ArrayList<Portal> newPortals = new ArrayList<>();
 
         ServerWorld destination = Util.getDestination(player);
 
@@ -66,13 +66,14 @@ public class PortalManager {
                 boolean hasCorners = hasCorners(world, upperRight, lowerLeft, axis);
                 TransformProfile transformProfile = createTransformProfile(lowerLeft, destination);
                 Portal p = new Portal(upperRight, lowerLeft, axis, hasCorners, transformProfile);
-                this.portals.add(p);
+                newPortals.add(p);
 
                 BlockPos.iterate(upperRight,lowerLeft).forEach((pos) -> {
                     checked.add(pos.toImmutable());
                 });
             } catch (IllegalArgumentException ignored) {}
         }
+        this.portals = newPortals;
     }
 
     private static boolean hasCorners(ServerWorld world, BlockPos upperRight, BlockPos lowerLeft, Direction.Axis axis) {

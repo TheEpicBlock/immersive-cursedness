@@ -1,5 +1,6 @@
 package nl.theepicblock.immersive_cursedness.objects;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockRotation;
@@ -31,6 +32,20 @@ public class TransformProfile {
         return pos.addIntoBlockPos(target);
     }
 
+    public BlockPos untransform(BlockPos in) {
+        ImPos pos = new ImPos(
+                in.getX()-target.getX(),
+                in.getY()-target.getY(),
+                in.getZ()-target.getZ()
+        );
+        pos = unrotate(pos);
+        return new BlockPos(
+                pos.x+target.getX()-transform.getX(),
+                pos.y+target.getY()-transform.getY(),
+                pos.z+target.getZ()-transform.getZ()
+        );
+    }
+
     public ImPos rotate(ImPos in) {
         switch (rotation) {
             default:
@@ -38,6 +53,19 @@ public class TransformProfile {
             case 90:
                 return new ImPos(-in.getZ(), in.getY(), in.getX());
             case -90:
+                return new ImPos(in.getZ(), in.getY(), -in.getX());
+            case 180:
+                return new ImPos(-in.getZ(), in.getY(), -in.getX());
+        }
+    }
+
+    public ImPos unrotate(ImPos in) {
+        switch (rotation) {
+            default:
+                return in;
+            case -90:
+                return new ImPos(-in.getZ(), in.getY(), in.getX());
+            case 90:
                 return new ImPos(in.getZ(), in.getY(), -in.getX());
             case 180:
                 return new ImPos(-in.getZ(), in.getY(), -in.getX());

@@ -29,10 +29,9 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	}
 
 	@Override
-	public FlatStandingRectangle expand(int i, Vec3d source) {
+	public FlatStandingRectangle expandAbsolute(double newOther, Vec3d source) {
 		double distance = Util.get(source, this.axis)-this.other;
 		double sourceForPrimaryAxis = Util.get(source,Util.rotate(axis));
-		double newOther = this.other<Util.get(source,axis) ? this.other-i : this.other+i;
 		double newDistance = Util.get(source, this.axis)-newOther;
 		return new RectangleWithCutoutCorners(
 				source.y+(this.top-source.y)/distance*newDistance,

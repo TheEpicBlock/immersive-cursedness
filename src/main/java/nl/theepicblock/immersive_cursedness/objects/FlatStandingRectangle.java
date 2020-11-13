@@ -56,9 +56,12 @@ public class FlatStandingRectangle {
     }
 
     public FlatStandingRectangle expand(int i, Vec3d source) {
+        return expandAbsolute(this.other<Util.get(source,axis) ? this.other-i : this.other+i, source);
+    }
+
+    public FlatStandingRectangle expandAbsolute(double newOther, Vec3d source) {
         double distance = Util.get(source, this.axis)-this.other;
         double sourceForPrimaryAxis = Util.get(source,Util.rotate(axis));
-        double newOther = this.other<Util.get(source,axis) ? this.other-i : this.other+i;
         double newDistance = Util.get(source, this.axis)-newOther;
         return new FlatStandingRectangle(
                 source.y+(this.top-source.y)/distance*newDistance,
@@ -82,10 +85,10 @@ public class FlatStandingRectangle {
     public boolean contains(BlockPos pos) {
         Direction.Axis rotAxis = Util.rotate(axis);
         return  Util.get(pos, axis) == this.other &&
-                pos.getY() >= this.bottom-0.5 &&
-                pos.getY() <= this.top-0.5 &&
-                Util.get(pos, rotAxis) >= this.left-0.5 &&
-                Util.get(pos, rotAxis) <= this.right-0.5;
+                pos.getY() > this.bottom-0.5 &&
+                pos.getY() < this.top-0.5 &&
+                Util.get(pos, rotAxis) > this.left-0.5 &&
+                Util.get(pos, rotAxis) < this.right-0.5;
     }
 
     public boolean isBeside(Vec3d pos) {

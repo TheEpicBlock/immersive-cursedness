@@ -2,6 +2,7 @@ package nl.theepicblock.immersive_cursedness.objects;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import nl.theepicblock.immersive_cursedness.Util;
 
 public class Portal {
@@ -34,6 +35,12 @@ public class Portal {
         Direction.Axis axis = this.getAxis();
         return this.getRight() >= b.getRight() &&
                 this.getLeft() <= b.getLeft();
+    }
+
+    public boolean isBlockposBehind(BlockPos p, Vec3d originContext) {
+        FlatStandingRectangle rect = this.toFlatStandingRectangle();
+        FlatStandingRectangle rect2 = rect.expandAbsolute(Util.get(p, rect.axis), originContext);
+        return rect2.contains(p);
     }
 
     public BlockPos getUpperRight() {
@@ -104,5 +111,38 @@ public class Portal {
                 return 180;
             }
         }
+    }
+
+    public boolean isCloserThan(Vec3d p, int i) {
+        double lrp = Util.get(p, axis);
+        double lrmin = Util.get(lowerLeft, axis);
+        double lrmax = Util.get(upperRight, axis)+1;
+        double lrd;
+        if (lrp > lrmax) {
+            lrd = lrp-lrmax;
+        } else if (lrp < lrmin) {
+            lrd = lrmin-lrp;
+        } else {
+            lrd = 0;
+        }
+        if (lrd > i) return false;
+
+        double yp = p.y;
+        double ymin = lowerLeft.getY();
+        double ymax = upperRight.getY()+1;
+        double yd;
+        if (yp > ymax) {
+            yd = yp-ymax;
+        } else if (yp < ymin) {
+            yd = ymin-yp;
+        } else {
+            yd = 0;
+        }
+        if (yd > i) return false;
+
+        Direction.Axis other = Util.rotate(axis);
+        double od = Math.abs(Util.get(p, other)-Util.get(lowerLeft,other));
+        if (od > i) return false;
+        return (lrd*lrd+yd*yd*od*od)<i*i;
     }
 }

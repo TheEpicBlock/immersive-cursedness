@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
@@ -145,5 +146,9 @@ public class Util {
         double zz = (double)z*(double)z;
 
         return xx + yy + zz;
+    }
+
+    public static PlayerManager getManagerFromPlayer(ServerPlayerEntity player) {
+        return ImmersiveCursedness.cursednessServer.getManager(player);
     }
 }

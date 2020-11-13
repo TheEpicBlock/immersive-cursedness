@@ -14,10 +14,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
 import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
-import nl.theepicblock.immersive_cursedness.objects.BlockCache;
-import nl.theepicblock.immersive_cursedness.objects.Chunk2IntMap;
-import nl.theepicblock.immersive_cursedness.objects.FlatStandingRectangle;
-import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
+import nl.theepicblock.immersive_cursedness.objects.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -54,8 +51,12 @@ public class PlayerManager {
         BlockState atmosphereBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
+        ((CloseToPortalProvider)player).setCloseToPortal(false);
         //iterate through all portals
         portalManager.getPortals().forEach(portal -> {
+            if (portal.isCloserThan(player.getPos(),6)) {
+                ((CloseToPortalProvider)player).setCloseToPortal(true);
+            }
             TransformProfile transformProfile = portal.getTransformProfile();
             if (transformProfile == null) return;
 
@@ -132,6 +133,15 @@ public class PlayerManager {
                 }
             }
         });
+    }
+
+    public BlockPos transform(BlockPos p) {
+        for (Portal portal : portalManager.getPortals()) {
+            if (portal.isBlockposBehind(p, player.getPos())) {
+                return portal.getTransformProfile().transform(p);
+            }
+        }
+        return null;
     }
 
     private List<Entity> getEntitiesInRange() {

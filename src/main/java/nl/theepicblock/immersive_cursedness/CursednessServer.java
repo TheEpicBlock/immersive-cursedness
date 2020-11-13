@@ -56,4 +56,8 @@ public class CursednessServer {
             manager.tick(tickCount);
         });
     }
+
+    public PlayerManager getManager(ServerPlayerEntity player) {
+        return playerManagers.get(player);
+    }
 }
