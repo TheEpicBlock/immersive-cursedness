@@ -49,36 +49,36 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		return false;
 	}
 
-	@Redirect(method = "onSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/c2s/play/UpdateSignC2SPacket;getPos()Lnet/minecraft/util/math/BlockPos;"))
-	public BlockPos redirectSignPos(UpdateSignC2SPacket updateSignC2SPacket) {
-		if (PlayerInterface.isCloseToPortal(player)) {
-			BlockPos pos = updateSignC2SPacket.getPos();
-			PlayerManager manager = Util.getManagerFromPlayer(player);
-			if (manager == null) return pos;
-			BlockPos z = manager.transform(pos);
-			if (z == null) {
-				return pos;
-			} else {
-				return z;
-			}
-		}
-		return updateSignC2SPacket.getPos();
-	}
-
-	@Redirect(method = "onSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getServerWorld()Lnet/minecraft/server/world/ServerWorld;", ordinal = 1))
-	public ServerWorld redirectSignWorld(ServerPlayerEntity player, UpdateSignC2SPacket updateSignC2SPacket) {
-		if (PlayerInterface.isCloseToPortal(player)) {
-			PlayerManager manager = Util.getManagerFromPlayer(player);
-			if (manager == null) return player.getServerWorld();
-			BlockPos z = manager.transform(updateSignC2SPacket.getPos());
-			if (z == null) {
-				return player.getServerWorld();
-			} else {
-				return Util.getDestination(player);
-			}
-		}
-		return player.getServerWorld();
-	}
+//	@Redirect(method = "onSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/c2s/play/UpdateSignC2SPacket;getPos()Lnet/minecraft/util/math/BlockPos;"))
+//	public BlockPos redirectSignPos(UpdateSignC2SPacket updateSignC2SPacket) {
+//		if (PlayerInterface.isCloseToPortal(player)) {
+//			BlockPos pos = updateSignC2SPacket.getPos();
+//			PlayerManager manager = Util.getManagerFromPlayer(player);
+//			if (manager == null) return pos;
+//			BlockPos z = manager.transform(pos);
+//			if (z == null) {
+//				return pos;
+//			} else {
+//				return z;
+//			}
+//		}
+//		return updateSignC2SPacket.getPos();
+//	}
+//
+//	@Redirect(method = "onSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getServerWorld()Lnet/minecraft/server/world/ServerWorld;", ordinal = 1))
+//	public ServerWorld redirectSignWorld(ServerPlayerEntity player, UpdateSignC2SPacket updateSignC2SPacket) {
+//		if (PlayerInterface.isCloseToPortal(player)) {
+//			PlayerManager manager = Util.getManagerFromPlayer(player);
+//			if (manager == null) return player.getServerWorld();
+//			BlockPos z = manager.transform(updateSignC2SPacket.getPos());
+//			if (z == null) {
+//				return player.getServerWorld();
+//			} else {
+//				return Util.getDestination(player);
+//			}
+//		}
+//		return player.getServerWorld();
+//	}
 
 	@Inject(method = "onPlayerInteractBlock", at = @At("HEAD"), cancellable = true)
 	public void onInteractBlock(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
