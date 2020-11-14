@@ -30,7 +30,7 @@ public class PortalManager {
     }
 
     public void update() {
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = ((PlayerInterface)player).getUnfakedWorld();
 
         Stream<PointOfInterest> portalStream = getPortalsInChunkRadius(world.getPointOfInterestStorage(), player.getBlockPos(), config.renderDistance);
         PointOfInterest[] portals = portalStream.toArray(PointOfInterest[]::new);
@@ -106,7 +106,7 @@ public class PortalManager {
     }
 
     private TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
-        DummyEntity dummyEntity = new DummyEntity(player.getServerWorld(), pos);
+        DummyEntity dummyEntity = new DummyEntity(((PlayerInterface)player).getUnfakedWorld(), pos);
         dummyEntity.setYaw(0);
         TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);
 

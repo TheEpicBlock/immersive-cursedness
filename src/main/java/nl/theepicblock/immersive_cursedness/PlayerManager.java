@@ -39,8 +39,8 @@ public class PlayerManager {
         if (tickCount % 30 == 0) {
             portalManager.update();
         }
-        ServerWorld serverWorld = this.player.getServerWorld();
-        ServerWorld destination = Util.getDestination(player);
+        ServerWorld serverWorld = ((PlayerInterface)player).getUnfakedWorld();
+        ServerWorld destination = Util.getDestination(serverWorld);
 
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(blockCache.size());
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
@@ -51,11 +51,11 @@ public class PlayerManager {
         BlockState atmosphereBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
-        ((CloseToPortalProvider)player).setCloseToPortal(false);
+        ((PlayerInterface)player).setCloseToPortal(false);
         //iterate through all portals
         portalManager.getPortals().forEach(portal -> {
             if (portal.isCloserThan(player.getPos(),6)) {
-                ((CloseToPortalProvider)player).setCloseToPortal(true);
+                ((PlayerInterface)player).setCloseToPortal(true);
             }
             TransformProfile transformProfile = portal.getTransformProfile();
             if (transformProfile == null) return;
@@ -145,7 +145,7 @@ public class PlayerManager {
     }
 
     private List<Entity> getEntitiesInRange() {
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = ((PlayerInterface)player).getUnfakedWorld();
         return ChunkPos.stream(new ChunkPos(player.getBlockPos()), config.renderDistance).flatMap((chunkPos) -> {
             Optional<Chunk> chunkOptional = Util.getChunkAsync(world, chunkPos.x,chunkPos.z);
             if (chunkOptional.isPresent()) {

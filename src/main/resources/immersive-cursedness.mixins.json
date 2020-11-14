@@ -8,6 +8,7 @@
     "MixinPlayerEntity",
     "MixinServerPlayerEntity",
     "ServerChunkManagerInvoker",
+    "interdimensionalpackets.InventoryDistanceMixin",
     "interdimensionalpackets.MixinInteractionManager",
     "interdimensionalpackets.PlayerActionC2SMixin",
     "interdimensionalpackets.ServerPlayNetworkHandlerMixin"

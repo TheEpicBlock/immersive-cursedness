@@ -6,7 +6,7 @@ import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import nl.theepicblock.immersive_cursedness.CloseToPortalProvider;
+import nl.theepicblock.immersive_cursedness.PlayerInterface;
 import nl.theepicblock.immersive_cursedness.PlayerManager;
 import nl.theepicblock.immersive_cursedness.Util;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +23,7 @@ public class MixinInteractionManager {
 
 	@Inject(method = "processBlockBreakingAction", at = @At(value = "INVOKE",shift = At.Shift.AFTER,target = "Lnet/minecraft/util/math/BlockPos;getZ()I"))
 	public void breakInject(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, CallbackInfo ci) {
-		if (CloseToPortalProvider.get(player)) {
+		if (PlayerInterface.isCloseToPortal(player)) {
 			PlayerManager manager = Util.getManagerFromPlayer(player);
 			if (manager == null) return;
 			BlockPos z = manager.transform(pos);
@@ -37,4 +37,26 @@ public class MixinInteractionManager {
 			this.world = player.getServerWorld();
 		}
 	}
+
+//	@Unique private BlockPos cachedPos;
+//	@ModifyVariable(method = "interactBlock", at = @At("HEAD"))
+//	public BlockHitResult redirectBlock(BlockHitResult in) {
+//		if (CloseToPortalProvider.get(player)) {
+//			PlayerManager manager = Util.getManagerFromPlayer(player);
+//			if (manager == null) return in;
+//			cachedPos = manager.transform(in.getBlockPos());
+//			if (cachedPos != null) {
+//				return new BlockHitResult(in.getPos(), in.getSide(), cachedPos, in.isInsideBlock());
+//			}
+//		}
+//		return in;
+//	}
+//
+//	@ModifyVariable(method = "interactBlock", at = @At("HEAD"))
+//	public World redirectWorld(World in) {
+//		if (cachedPos != null) {
+//			return Util.getDestination((ServerWorld)in);
+//		}
+//		return in;
+//	}
 }

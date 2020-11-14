@@ -112,6 +112,10 @@ public class Util {
         );
     }
 
+    public static Vec3d add(Vec3d v, Direction d, double b) {
+        return v.add(d.getOffsetX()*b, d.getOffsetY()*b, d.getOffsetZ()*b);
+    }
+
     private static final BlockState AIR = Blocks.AIR.getDefaultState();
     public static BlockState getBlockAsync(ServerWorld world, BlockPos pos) {
         Optional<Chunk> chunkOptional = getChunkAsync(world, pos.getX() >> 4, pos.getZ() >> 4);
@@ -126,7 +130,10 @@ public class Util {
     }
 
     public static ServerWorld getDestination(ServerPlayerEntity player) {
-        ServerWorld serverWorld = player.getServerWorld();
+        return getDestination(((PlayerInterface)player).getUnfakedWorld());
+    }
+
+    public static ServerWorld getDestination(ServerWorld serverWorld) {
         MinecraftServer minecraftServer = serverWorld.getServer();
         RegistryKey<World> registryKey = serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER;
         return minecraftServer.getWorld(registryKey);
