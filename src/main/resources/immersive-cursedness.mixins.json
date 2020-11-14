@@ -13,6 +13,9 @@
     "interdimensionalpackets.PlayerActionC2SMixin",
     "interdimensionalpackets.ServerPlayNetworkHandlerMixin"
   ],
+  "client": [
+    "interdimensionalpackets.ClientPlayerActionMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
