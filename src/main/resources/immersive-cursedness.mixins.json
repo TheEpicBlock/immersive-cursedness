@@ -5,11 +5,12 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "EntityPositionS2CPacketAccessor",
-    "interdimensionalpackets.MixinInteractionManager",
     "MixinPlayerEntity",
     "MixinServerPlayerEntity",
+    "ServerChunkManagerInvoker",
+    "interdimensionalpackets.MixinInteractionManager",
     "interdimensionalpackets.PlayerActionC2SMixin",
-    "ServerChunkManagerInvoker"
+    "interdimensionalpackets.ServerPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
