@@ -1,4 +1,4 @@
-package nl.theepicblock.immersive_cursedness.mixin;
+package nl.theepicblock.immersive_cursedness.mixin.interdimensionalpackets;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
