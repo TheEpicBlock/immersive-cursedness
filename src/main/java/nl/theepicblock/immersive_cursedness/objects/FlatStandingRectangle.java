@@ -1,5 +1,7 @@
 package nl.theepicblock.immersive_cursedness.objects;
 
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -116,6 +118,17 @@ public class FlatStandingRectangle {
                 predicate.accept(mutPos);
             }
         }
+    }
+
+    public void visualise(ServerPlayerEntity p) {
+        long top = Math.round(this.top);
+        long bottom = Math.round(this.bottom);
+        long left = Math.round(this.left);
+        long right = Math.round(this.right);
+        Util.sendParticle(p, this.createVec3d(top, left));
+        Util.sendParticle(p, this.createVec3d(top, right));
+        Util.sendParticle(p, this.createVec3d(bottom, left));
+        Util.sendParticle(p, this.createVec3d(bottom, right));
     }
 
     private Vec3d createVec3d(double y, double primaryAxis) {

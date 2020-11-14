@@ -17,6 +17,7 @@ import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccesso
 import nl.theepicblock.immersive_cursedness.objects.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,13 +60,14 @@ public class PlayerManager {
         if (player.hasNetherPortalCooldown())return;
 
         ((PlayerInterface)player).setCloseToPortal(false);
+        AtomicInteger packetLimit = new AtomicInteger(config.maxPacketsPerClientPerTick);
         //iterate through all portals
-        portalManager.getPortals().forEach(portal -> {
-            if (portal.isCloserThan(player.getPos(),6)) {
+        for (Portal portal : portalManager.getPortals()) {
+            if (portal.isCloserThan(player.getPos(), 6)) {
                 ((PlayerInterface)player).setCloseToPortal(true);
             }
             TransformProfile transformProfile = portal.getTransformProfile();
-            if (transformProfile == null) return;
+            if (transformProfile == null) continue;
 
             if (tickCount % 40 == 0) {
                 //replace the portal blocks in the center of the portal with air
@@ -79,6 +81,7 @@ public class PlayerManager {
             for (int i = 1; i < config.portalDepth; i++) {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
                 sentLayers.add(rect2);
+                if (config.debugParticles) rect2.visualise(player);
 
                 entities.removeIf((entity) -> {
                     if (rect2.contains(entity.getPos())) {
@@ -89,7 +92,7 @@ public class PlayerManager {
                         }
                         //If we've reached this point. The entity isn't hidden yet. So we should hide it
                         EntityPositionS2CPacket packet = new EntityPositionS2CPacket(entity);
-                        ((EntityPositionS2CPacketAccessor)packet).setX(entity.getX()+50);
+                        ((EntityPositionS2CPacketAccessor)packet).setX(entity.getX() + 50);
                         ((EntityPositionS2CPacketAccessor)packet).setY(Double.MAX_VALUE);
                         player.networkHandler.sendPacket(packet);
                         hiddenEntities.add(entity.getUuid());
@@ -118,16 +121,19 @@ public class PlayerManager {
 
                     BlockPos imPos = pos.toImmutable();
                     sentBlocks.increment(imPos);
+                    if (packetLimit.get() == 0) return;
                     if (!(blockCache.get(imPos) == ret)) {
                         blockCache.put(imPos, ret);
+                        packetLimit.getAndDecrement();
                         player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
                     }
                 });
             }
-        });
+        }
 
         //get all of the old blocks and remove them
         blockCache.purge(sentBlocks, sentLayers, (pos) -> {
+            if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos));
             player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, Util.getBlockAsync(serverWorld, pos)));
         });
 
