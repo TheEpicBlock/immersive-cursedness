@@ -27,6 +27,7 @@ public class PlayerManager {
     private final PortalManager portalManager;
     private BlockCache blockCache = new BlockCache();
     private final List<UUID> hiddenEntities = new ArrayList<>();
+    private ServerWorld previousWorld;
 
     public PlayerManager(ServerPlayerEntity player, Config config) {
         this.player = player;
@@ -41,6 +42,10 @@ public class PlayerManager {
         }
         ServerWorld serverWorld = ((PlayerInterface)player).getUnfakedWorld();
         ServerWorld destination = Util.getDestination(serverWorld);
+
+        if (serverWorld != previousWorld) {
+            blockCache = new BlockCache();
+        }
 
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(blockCache.size());
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
@@ -133,6 +138,7 @@ public class PlayerManager {
                 }
             }
         });
+        previousWorld = serverWorld;
     }
 
     public BlockPos transform(BlockPos p) {
