@@ -37,26 +37,4 @@ public class MixinInteractionManager {
 			this.world = player.getServerWorld();
 		}
 	}
-
-//	@Unique private BlockPos cachedPos;
-//	@ModifyVariable(method = "interactBlock", at = @At("HEAD"))
-//	public BlockHitResult redirectBlock(BlockHitResult in) {
-//		if (CloseToPortalProvider.get(player)) {
-//			PlayerManager manager = Util.getManagerFromPlayer(player);
-//			if (manager == null) return in;
-//			cachedPos = manager.transform(in.getBlockPos());
-//			if (cachedPos != null) {
-//				return new BlockHitResult(in.getPos(), in.getSide(), cachedPos, in.isInsideBlock());
-//			}
-//		}
-//		return in;
-//	}
-//
-//	@ModifyVariable(method = "interactBlock", at = @At("HEAD"))
-//	public World redirectWorld(World in) {
-//		if (cachedPos != null) {
-//			return Util.getDestination((ServerWorld)in);
-//		}
-//		return in;
-//	}
 }
