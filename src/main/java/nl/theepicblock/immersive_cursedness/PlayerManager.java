@@ -41,21 +41,24 @@ public class PlayerManager {
         if (tickCount % 30 == 0) {
             portalManager.update();
         }
-        ServerWorld serverWorld = ((PlayerInterface)player).getUnfakedWorld();
-        ServerWorld destination = Util.getDestination(serverWorld);
+        ServerWorld sourceWorld = ((PlayerInterface)player).getUnfakedWorld();
+        ServerWorld destinationWorld = Util.getDestination(sourceWorld);
+        AsyncWorldView sourceView = new AsyncWorldView(sourceWorld);
+        AsyncWorldView destinationView = new AsyncWorldView(destinationWorld);
 
-        if (serverWorld != previousWorld) {
+
+        if (sourceWorld != previousWorld) {
             blockCache = new BlockCache();
         }
 
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(blockCache.size());
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
 
-        List<Entity> entities = this.getEntitiesInRange();
+        List<Entity> entities = this.getEntitiesInRange(sourceView);
         if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
 
-        BlockState atmosphereBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
-        BlockState atmosphereBetweenBlock = (serverWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
+        BlockState atmosphereBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
+        BlockState atmosphereBetweenBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
         if (player.hasNetherPortalCooldown())return;
 
@@ -113,7 +116,7 @@ public class PlayerManager {
                     } else if (dist > config.squaredAtmosphereRadiusMinusOne) {
                         ret = atmosphereBetweenBlock;
                     } else {
-                        ret = transformProfile.transformAndGetFromWorld(pos, destination);
+                        ret = transformProfile.transformAndGetFromWorld(pos, destinationView);
                     }
 
                     if (pos.getY() == 1) ret = atmosphereBetweenBlock;
@@ -133,9 +136,9 @@ public class PlayerManager {
 
         //get all of the old blocks and remove them
         blockCache.purge(sentBlocks, sentLayers, (pos, cachedState) -> {
-            BlockState originalBlock = Util.getBlockAsync(serverWorld, pos);
+            BlockState originalBlock = sourceView.getBlock(pos);
             if (originalBlock != cachedState) {
-                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, Util.getBlockAsync(serverWorld, pos)));
+                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, originalBlock));
             }
             if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
@@ -149,7 +152,7 @@ public class PlayerManager {
                 }
             }
         });
-        previousWorld = serverWorld;
+        previousWorld = sourceWorld;
     }
 
     public BlockPos transform(BlockPos p) {
@@ -161,18 +164,15 @@ public class PlayerManager {
         return null;
     }
 
-    private List<Entity> getEntitiesInRange() {
-        ServerWorld world = ((PlayerInterface)player).getUnfakedWorld();
+    private List<Entity> getEntitiesInRange(AsyncWorldView world) {
         return ChunkPos.stream(new ChunkPos(player.getBlockPos()), config.renderDistance).flatMap((chunkPos) -> {
-            Optional<Chunk> chunkOptional = Util.getChunkAsync(world, chunkPos.x,chunkPos.z);
-            if (chunkOptional.isPresent()) {
-                Chunk chunk = chunkOptional.get();
-                if (chunk instanceof WorldChunk) {
-                    WorldChunk worldChunk = (WorldChunk)chunk;
-                    return Arrays.stream(worldChunk.getEntitySectionArray()).flatMap((Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream);
-                }
+            Chunk chunk = world.getChunk(chunkPos);
+            if (chunk instanceof WorldChunk) {
+                WorldChunk worldChunk = (WorldChunk)chunk;
+                return Arrays.stream(worldChunk.getEntitySectionArray()).flatMap((Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream);
+            } else {
+                return Stream.empty();
             }
-            return Stream.empty();
         }).collect(Collectors.toList());
     }
 
