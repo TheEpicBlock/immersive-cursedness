@@ -23,6 +23,7 @@ public class PortalManager {
     private ArrayList<Portal> portals = new ArrayList<>();
     private final ServerPlayerEntity player;
     private final Config config;
+    public static boolean portalForcerMixinActivate = false;
 
     public PortalManager(ServerPlayerEntity player, Config config) {
         this.player = player;
@@ -108,7 +109,9 @@ public class PortalManager {
     private TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
         DummyEntity dummyEntity = new DummyEntity(((PlayerInterface)player).getUnfakedWorld(), pos);
         dummyEntity.setYaw(0);
+        portalForcerMixinActivate = true;
         TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);
+        portalForcerMixinActivate = false;
 
         if (teleportTarget == null) {
             return null;
