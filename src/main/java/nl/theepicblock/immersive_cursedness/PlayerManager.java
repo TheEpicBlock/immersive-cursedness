@@ -38,6 +38,10 @@ public class PlayerManager {
 
     @SuppressWarnings("ConstantConditions")
     public void tick(int tickCount) {
+        if (((PlayerInterface)player).getEnabled() == false) {
+            return;
+        }
+
         if (tickCount % 30 == 0) {
             portalManager.update();
         }
@@ -46,12 +50,11 @@ public class PlayerManager {
         AsyncWorldView sourceView = new AsyncWorldView(sourceWorld);
         AsyncWorldView destinationView = new AsyncWorldView(destinationWorld);
 
-
         if (sourceWorld != previousWorld) {
             blockCache = new BlockCache();
         }
 
-        List<FlatStandingRectangle> sentLayers = new ArrayList<>(blockCache.size());
+        List<FlatStandingRectangle> sentLayers = new ArrayList<>(portalManager.getPortals().size()*config.portalDepth);
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
 
         List<Entity> entities = this.getEntitiesInRange(sourceView);
@@ -164,6 +167,22 @@ public class PlayerManager {
             }
         }
         return null;
+    }
+
+    public void purgeCache() {
+        ((PlayerInterface)player).setCloseToPortal(false);
+        blockCache.purgeAll((pos, cachedState) -> {
+            BlockState originalBlock = Util.getBlockAsync(player.getServerWorld(), pos);
+            if (originalBlock != cachedState) {
+                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, originalBlock));
+            }
+            if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
+        });
+        for (Portal portal : portalManager.getPortals()) {
+            BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
+                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Util.getBlockAsync(player.getServerWorld(), pos)));
+            });
+        }
     }
 
     private List<Entity> getEntitiesInRange(AsyncWorldView world) {

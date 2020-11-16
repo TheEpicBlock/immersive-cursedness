@@ -97,4 +97,10 @@ public class BlockCache {
 		size -= v.size();
 		v.forEach(onRemove);
 	}
+
+	public void purgeAll(BiConsumer<BlockPos, BlockState> onRemove) {
+		cache.values().forEach((slice) -> purge(slice, onRemove));
+		cache.clear();
+		size=0;
+	}
 }

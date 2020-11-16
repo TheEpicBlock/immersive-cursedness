@@ -15,4 +15,7 @@ public interface PlayerInterface {
 	void fakeWorld(World world);
 	void deFakeWorld();
 	ServerWorld getUnfakedWorld();
+
+	void setEnabled(boolean v);
+	boolean getEnabled();
 }
