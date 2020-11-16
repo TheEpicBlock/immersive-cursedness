@@ -1,8 +1,6 @@
 package nl.theepicblock.immersive_cursedness.objects;
 
-import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +16,7 @@ public class BlockCache {
 	public final static int CHUNK_SIZE = 2;
 	public final static int DEFAULT_MAP_SIZE = 16;
 	public final static int DEFAULT_HASHMAP_SIZE = 256;
-	private final Int2ObjectMap<Int2ObjectMap<Map<BlockPos,BlockState>>> cache = new Int2ObjectArrayMap<>(DEFAULT_MAP_SIZE);
+	private final Int2ObjectMap<Int2ObjectMap<Map<BlockPos,BlockState>>> cache = new Int2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE);
 	private int size = 0;
 
 	public BlockState get(BlockPos p) {
@@ -33,7 +31,7 @@ public class BlockCache {
 	public void put(BlockPos p, BlockState t) {
 		Int2ObjectMap<Map<BlockPos,BlockState>> chunkSlice = cache.get(p.getX() >> CHUNK_SIZE);
 		if (chunkSlice == null) {
-			chunkSlice = new Int2ObjectArrayMap<>(DEFAULT_MAP_SIZE);
+			chunkSlice = new Int2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE);
 			cache.put(p.getX() >> CHUNK_SIZE, chunkSlice);
 		}
 
@@ -57,7 +55,7 @@ public class BlockCache {
 			int x = sliceEntry.getIntKey();
 			Int2ObjectMap<Map<BlockPos,BlockState>> cacheSlice = sliceEntry.getValue();
 
-			Int2IntArrayMap countSlice = blockPerChunk.getSlice(x);
+			Int2IntMap countSlice = blockPerChunk.getSlice(x);
 			if (countSlice == null) { //there was nothing sent in this entire slice, so it can be purged
 				purge(cacheSlice, onRemove);
 				cache.remove(x);

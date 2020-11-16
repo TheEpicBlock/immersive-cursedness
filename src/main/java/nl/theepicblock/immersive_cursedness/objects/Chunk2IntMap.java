@@ -1,8 +1,6 @@
 package nl.theepicblock.immersive_cursedness.objects;
 
-import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 
@@ -13,18 +11,18 @@ import static nl.theepicblock.immersive_cursedness.objects.BlockCache.CHUNK_SIZE
 import static nl.theepicblock.immersive_cursedness.objects.BlockCache.DEFAULT_MAP_SIZE;
 
 public class Chunk2IntMap {
-	private final Int2ObjectMap<Int2IntArrayMap> map = new Int2ObjectArrayMap<>(DEFAULT_MAP_SIZE);
+	private final Int2ObjectMap<Int2IntMap> map = new Int2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE);
 	private int total = 0;
 
-	public Int2IntArrayMap getSlice(int chunkX) {
+	public Int2IntMap getSlice(int chunkX) {
 		return map.get(chunkX);
 	}
 
 
 	public void increment(BlockPos p) {
-		Int2IntArrayMap chunkSlice = map.get(p.getX() >> CHUNK_SIZE);
+		Int2IntMap chunkSlice = map.get(p.getX() >> CHUNK_SIZE);
 		if (chunkSlice == null) {
-			chunkSlice = new Int2IntArrayMap(DEFAULT_MAP_SIZE);
+			chunkSlice = new Int2IntOpenHashMap(DEFAULT_MAP_SIZE);
 			chunkSlice.defaultReturnValue(0);
 			map.put(p.getX() >> CHUNK_SIZE, chunkSlice);
 		}
