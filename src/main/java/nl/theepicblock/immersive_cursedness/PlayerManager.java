@@ -127,8 +127,10 @@ public class PlayerManager {
                     if (packetLimit.get() == 0) return;
                     if (!(blockCache.get(imPos) == ret)) {
                         blockCache.put(imPos, ret);
-                        packetLimit.getAndDecrement();
-                        player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
+                        if (!ret.isAir() || !sourceView.getBlock(pos).isAir()) {
+                            packetLimit.getAndDecrement();
+                            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
+                        }
                     }
                 });
             }
