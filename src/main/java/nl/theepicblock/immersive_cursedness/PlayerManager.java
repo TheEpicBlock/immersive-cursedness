@@ -132,9 +132,12 @@ public class PlayerManager {
         }
 
         //get all of the old blocks and remove them
-        blockCache.purge(sentBlocks, sentLayers, (pos) -> {
-            if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos));
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, Util.getBlockAsync(serverWorld, pos)));
+        blockCache.purge(sentBlocks, sentLayers, (pos, cachedState) -> {
+            BlockState originalBlock = Util.getBlockAsync(serverWorld, pos);
+            if (originalBlock != cachedState) {
+                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, Util.getBlockAsync(serverWorld, pos)));
+            }
+            if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
 
         entities.forEach(entity -> {

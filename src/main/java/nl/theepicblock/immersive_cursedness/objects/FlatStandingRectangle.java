@@ -125,10 +125,10 @@ public class FlatStandingRectangle {
         long bottom = Math.round(this.bottom);
         long left = Math.round(this.left);
         long right = Math.round(this.right);
-        Util.sendParticle(p, this.createVec3d(top, left));
-        Util.sendParticle(p, this.createVec3d(top, right));
-        Util.sendParticle(p, this.createVec3d(bottom, left));
-        Util.sendParticle(p, this.createVec3d(bottom, right));
+        Util.sendParticle(p, this.createVec3d(top,    left ), 0, 1, 0);
+        Util.sendParticle(p, this.createVec3d(top,    right), 0, 1, 0);
+        Util.sendParticle(p, this.createVec3d(bottom, left ), 0, 1, 0);
+        Util.sendParticle(p, this.createVec3d(bottom, right), 0, 1, 0);
     }
 
     private Vec3d createVec3d(double y, double primaryAxis) {

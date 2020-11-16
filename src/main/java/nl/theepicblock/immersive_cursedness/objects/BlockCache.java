@@ -11,6 +11,7 @@ import net.minecraft.util.math.ChunkPos;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class BlockCache {
@@ -50,7 +51,7 @@ public class BlockCache {
 		return size;
 	}
 
-	public void purge(Chunk2IntMap blockPerChunk, List<FlatStandingRectangle> rects, Consumer<BlockPos> onRemove) {
+	public void purge(Chunk2IntMap blockPerChunk, List<FlatStandingRectangle> rects, BiConsumer<BlockPos, BlockState> onRemove) {
 		if (size == blockPerChunk.getTotal()) return;
 		for (Int2ObjectMap.Entry<Int2ObjectMap<Map<BlockPos,BlockState>>> sliceEntry : cache.int2ObjectEntrySet()) {
 			int x = sliceEntry.getIntKey();
@@ -75,13 +76,13 @@ public class BlockCache {
 				if (newZ != oldZ) {
 					Map<BlockPos,BlockState> map = mapEntry.getValue();
 					map.entrySet().removeIf((entry) -> {
-						BlockPos p = entry.getKey();
+						BlockPos mapBlockPos = entry.getKey();
 						for (FlatStandingRectangle rect : rects) {
-							if (rect.contains(p)) {
+							if (rect.contains(mapBlockPos)) {
 								return false;
 							}
 						}
-						onRemove.accept(p);
+						onRemove.accept(mapBlockPos, entry.getValue());
 						size--;
 						return true;
 					});
@@ -90,12 +91,12 @@ public class BlockCache {
 		}
 	}
 
-	private void purge(Int2ObjectMap<Map<BlockPos,BlockState>> v, Consumer<BlockPos> onRemove) {
+	private void purge(Int2ObjectMap<Map<BlockPos,BlockState>> v, BiConsumer<BlockPos, BlockState> onRemove) {
 		v.values().forEach((map) -> purge(map, onRemove));
 	}
 
-	private void purge(Map<BlockPos,BlockState> v, Consumer<BlockPos> onRemove) {
+	private void purge(Map<BlockPos,BlockState> v, BiConsumer<BlockPos, BlockState> onRemove) {
 		size -= v.size();
-		v.forEach((pos, state) -> onRemove.accept(pos));
+		v.forEach(onRemove);
 	}
 }

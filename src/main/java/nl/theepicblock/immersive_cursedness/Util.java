@@ -96,8 +96,8 @@ public class Util {
         player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, block.getDefaultState()));
     }
 
-    public static void sendParticle(ServerPlayerEntity player, Vec3d pos) {
-        player.networkHandler.sendPacket(new ParticleS2CPacket(new DustParticleEffect(0,1,0,1), true, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0));
+    public static void sendParticle(ServerPlayerEntity player, Vec3d pos, float r, float g, float b) {
+        player.networkHandler.sendPacket(new ParticleS2CPacket(new DustParticleEffect(r,g,b,1), true, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0));
     }
 
     public static BlockPos makeBlockPos(double x, double y, double z) {
