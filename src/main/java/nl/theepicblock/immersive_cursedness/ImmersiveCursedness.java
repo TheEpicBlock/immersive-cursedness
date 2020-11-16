@@ -19,6 +19,7 @@ public class ImmersiveCursedness implements ModInitializer {
                 cursednessServer.start();
             });
             cursednessThread.start();
+            cursednessThread.setName("Immersive Cursedness Thread");
         });
         ServerLifecycleEvents.SERVER_STOPPED.register(minecraftServer -> {
             cursednessServer.stop();
