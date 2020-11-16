@@ -91,6 +91,12 @@ public class TransformProfile {
         return this.rotateState(state);
     }
 
+    public BlockState transformAndGetFromWorld(BlockPos pos, ServerWorld world) {
+        BlockPos transformedPos = this.transform(pos);
+        BlockState state = Util.getBlockAsync(world, pos);
+        return this.rotateState(state);
+    }
+
     private static class ImPos {
         final private int x;
         final private int y;

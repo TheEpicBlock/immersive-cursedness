@@ -169,6 +169,15 @@ public class PlayerManager {
         return null;
     }
 
+    public TransformProfile getTransformProfile(BlockPos p) {
+        for (Portal portal : portalManager.getPortals()) {
+            if (portal.isBlockposBehind(p, player.getPos())) {
+                return portal.getTransformProfile();
+            }
+        }
+        return null;
+    }
+
     public void purgeCache() {
         ((PlayerInterface)player).setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {

@@ -25,6 +25,7 @@ import net.minecraft.world.World;
 import nl.theepicblock.immersive_cursedness.PlayerInterface;
 import nl.theepicblock.immersive_cursedness.PlayerManager;
 import nl.theepicblock.immersive_cursedness.Util;
+import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -56,7 +57,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
 			if (manager == null) return;
 			BlockHitResult hitResult = packet.getBlockHitResult();
 			BlockPos oldPos = hitResult.getBlockPos();
-			BlockPos newPos = manager.transform(oldPos);
+			TransformProfile transformProfile = manager.getTransformProfile(oldPos);
+			BlockPos newPos = transformProfile.transform(oldPos);
 			if (newPos == null) return;
 
 			ServerWorld destination = Util.getDestination(player);
@@ -83,13 +85,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
 				this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text2, MessageType.GAME_INFO, net.minecraft.util.Util.NIL_UUID));
 			}
 
-			this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos, Util.getBlockAsync(destination, newPos)));
-			BlockPos offsetTransformedPos = manager.transform(oldPos.offset(placementSide));
-			if (offsetTransformedPos != null) {
-				BlockState offsetBlock = Util.getBlockAsync(destination, offsetTransformedPos);
-				if (offsetBlock.getBlock() != Blocks.NETHER_PORTAL) {
-					this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos.offset(placementSide), offsetBlock));
-				}
+			this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos, transformProfile.rotateState(Util.getBlockAsync(destination, newPos))));
+			BlockState offsetBlock = transformProfile.transformAndGetFromWorld(oldPos.offset(placementSide), destination);
+			if (offsetBlock.getBlock() != Blocks.NETHER_PORTAL) {
+				this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos.offset(placementSide), offsetBlock));
 			}
 			ci.cancel();
 		}
