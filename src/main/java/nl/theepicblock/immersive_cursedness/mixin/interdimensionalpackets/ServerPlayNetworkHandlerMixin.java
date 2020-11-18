@@ -58,8 +58,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
 			BlockHitResult hitResult = packet.getBlockHitResult();
 			BlockPos oldPos = hitResult.getBlockPos();
 			TransformProfile transformProfile = manager.getTransformProfile(oldPos);
+			if (transformProfile == null) return;
 			BlockPos newPos = transformProfile.transform(oldPos);
-			if (newPos == null) return;
 
 			ServerWorld destination = Util.getDestination(player);
 			Direction placementSide = hitResult.getSide();
