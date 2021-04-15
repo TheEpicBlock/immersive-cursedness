@@ -3,7 +3,6 @@ package nl.theepicblock.immersive_cursedness;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -17,7 +16,6 @@ import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccesso
 import nl.theepicblock.immersive_cursedness.objects.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,6 +54,7 @@ public class PlayerManager {
 
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(portalManager.getPortals().size()*config.portalDepth);
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
+        BlockUpdateMap toBeSent = new BlockUpdateMap();
 
         List<Entity> entities = this.getEntitiesInRange(sourceView);
         if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
@@ -66,7 +65,6 @@ public class PlayerManager {
         if (player.hasNetherPortalCooldown())return;
 
         ((PlayerInterface)player).setCloseToPortal(false);
-        AtomicInteger packetLimit = new AtomicInteger(config.maxPacketsPerClientPerTick);
         //iterate through all portals
         for (Portal portal : portalManager.getPortals()) {
             if (portal.isCloserThan(player.getPos(), 6)) {
@@ -78,7 +76,7 @@ public class PlayerManager {
             if (tickCount % 40 == 0) {
                 //replace the portal blocks in the center of the portal with air
                 BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                    player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Blocks.AIR.getDefaultState()));
+                    toBeSent.put(pos.toImmutable(), Blocks.AIR.getDefaultState());
                 });
             }
 
@@ -127,12 +125,10 @@ public class PlayerManager {
 
                     BlockPos imPos = pos.toImmutable();
                     sentBlocks.increment(imPos);
-                    if (packetLimit.get() == 0) return;
                     if (!(blockCache.get(imPos) == ret)) {
                         blockCache.put(imPos, ret);
                         if (!ret.isAir() || !sourceView.getBlock(pos).isAir()) {
-                            packetLimit.getAndDecrement();
-                            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(imPos, ret));
+                            toBeSent.put(imPos, ret);
                         }
                     }
                 });
@@ -143,7 +139,7 @@ public class PlayerManager {
         blockCache.purge(sentBlocks, sentLayers, (pos, cachedState) -> {
             BlockState originalBlock = sourceView.getBlock(pos);
             if (originalBlock != cachedState) {
-                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, originalBlock));
+                toBeSent.put(pos, originalBlock);
             }
             if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
@@ -157,6 +153,7 @@ public class PlayerManager {
                 }
             }
         });
+        toBeSent.sendTo(this.player);
         previousWorld = sourceWorld;
     }
 
@@ -179,19 +176,21 @@ public class PlayerManager {
     }
 
     public void purgeCache() {
+        BlockUpdateMap packetStorage = new BlockUpdateMap();
         ((PlayerInterface)player).setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {
             BlockState originalBlock = Util.getBlockAsync(player.getServerWorld(), pos);
             if (originalBlock != cachedState) {
-                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, originalBlock));
+                packetStorage.put(pos, originalBlock);
             }
             if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
         for (Portal portal : portalManager.getPortals()) {
             BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                player.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos.toImmutable(), Util.getBlockAsync(player.getServerWorld(), pos)));
+                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getServerWorld(), pos));
             });
         }
+        packetStorage.sendTo(this.player);
     }
 
     private List<Entity> getEntitiesInRange(AsyncWorldView world) {

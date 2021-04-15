@@ -13,8 +13,6 @@ public class Config implements ConfigData {
 	private int atmosphereRadius = 28;
 	@Comment("Measured in chunks")
 	public int renderDistance = 3;
-	@Comment("Increasing will make the portal load faster. But will make the portal lag behind when moving. It's recommended to leave on default.")
-	public int maxPacketsPerClientPerTick = 250;
 	public boolean debugParticles = false;
 
 	public transient double squaredAtmosphereRadius;
