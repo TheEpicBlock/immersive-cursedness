@@ -40,16 +40,19 @@ public class PlayerManager {
             return;
         }
 
-        if (tickCount % 30 == 0) {
-            portalManager.update();
-        }
         ServerWorld sourceWorld = ((PlayerInterface)player).getUnfakedWorld();
         ServerWorld destinationWorld = Util.getDestination(sourceWorld);
         AsyncWorldView sourceView = new AsyncWorldView(sourceWorld);
         AsyncWorldView destinationView = new AsyncWorldView(destinationWorld);
 
+        boolean justWentThroughPortal = false;
         if (sourceWorld != previousWorld) {
             blockCache = new BlockCache();
+            justWentThroughPortal = true;
+        }
+
+        if (tickCount % 30 == 0 || justWentThroughPortal) {
+            portalManager.update();
         }
 
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(portalManager.getPortals().size()*config.portalDepth);
@@ -73,7 +76,7 @@ public class PlayerManager {
             TransformProfile transformProfile = portal.getTransformProfile();
             if (transformProfile == null) continue;
 
-            if (tickCount % 40 == 0) {
+            if (tickCount % 40 == 0 || justWentThroughPortal) {
                 //replace the portal blocks in the center of the portal with air
                 BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
                     toBeSent.put(pos.toImmutable(), Blocks.AIR.getDefaultState());
