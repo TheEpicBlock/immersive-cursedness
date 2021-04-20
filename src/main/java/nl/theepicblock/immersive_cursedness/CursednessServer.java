@@ -23,7 +23,13 @@ public class CursednessServer {
     public void start() {
         System.out.println("Starting immersive cursedness thread");
         while (isServerActive) {
-            if (System.currentTimeMillis() < nextTick) continue;
+            long currentTime = System.currentTimeMillis();
+            if (currentTime < nextTick) {
+                try {
+                    Thread.sleep(nextTick-currentTime);
+                } catch (InterruptedException ignored) {}
+                continue;
+            }
             try {
                 tick();
                 tickCount++;
