@@ -129,8 +129,8 @@ public class PlayerManager {
                     BlockPos imPos = pos.toImmutable();
                     sentBlocks.increment(imPos);
                     if (!(blockCache.get(imPos) == ret)) {
-                        blockCache.put(imPos, ret);
                         if (!ret.isAir() || !sourceView.getBlock(pos).isAir()) {
+                            blockCache.put(imPos, ret);
                             toBeSent.put(imPos, ret);
                         }
                     }
