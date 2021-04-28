@@ -13,5 +13,5 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(ServerChunkManager.class)
 public interface ServerChunkManagerInvoker {
     @Invoker("getChunkFuture")
-    CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> callGetChunkFuture(int chunkX, int chunkZ, ChunkStatus leastStatus, boolean create);
+    CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> ic$callGetChunkFuture(int chunkX, int chunkZ, ChunkStatus leastStatus, boolean create);
 }

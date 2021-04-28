@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EntityPositionS2CPacket.class)
 public interface EntityPositionS2CPacketAccessor {
     @Accessor("x")
-    void setX(double v);
+    void ic$setX(double v);
 
     @Accessor("y")
-    void setY(double v);
+    void ic$setY(double v);
 }

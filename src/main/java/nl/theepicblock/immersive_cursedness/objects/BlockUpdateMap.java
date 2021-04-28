@@ -10,8 +10,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import nl.theepicblock.immersive_cursedness.mixin.ChunkDeltaUpdateAccessor;
 
-import java.util.HashMap;
-
 public class BlockUpdateMap extends Long2ObjectOpenHashMap<Short2ObjectMap<BlockState>> {
     public void put(BlockPos p, BlockState t) {
         long cp = getChunkPos(p);
@@ -34,10 +32,10 @@ public class BlockUpdateMap extends Long2ObjectOpenHashMap<Short2ObjectMap<Block
             ChunkDeltaUpdateS2CPacket packet = new ChunkDeltaUpdateS2CPacket();
             ChunkDeltaUpdateAccessor accessor = (ChunkDeltaUpdateAccessor)packet;
 
-            accessor.setSectionPos(ChunkSectionPos.from(chunkSection));
-            accessor.setPositions(chunkContents.keySet().toShortArray());
-            accessor.setBlockStates(chunkContents.values().toArray(new BlockState[0]));
-            accessor.setField_26749(false);
+            accessor.ic$setSectionPos(ChunkSectionPos.from(chunkSection));
+            accessor.ic$setPositions(chunkContents.keySet().toShortArray());
+            accessor.ic$setBlockStates(chunkContents.values().toArray(new BlockState[0]));
+            accessor.ic$setField_26749(false);
 
             player.networkHandler.sendPacket(packet);
         });

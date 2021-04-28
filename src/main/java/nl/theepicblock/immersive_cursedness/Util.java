@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
@@ -125,7 +124,7 @@ public class Util {
 
     public static Optional<Chunk> getChunkAsync(ServerWorld world, int x, int z) {
         ServerChunkManagerInvoker chunkManager = (ServerChunkManagerInvoker)world.getChunkManager();
-        Either<Chunk,ChunkHolder.Unloaded> either = chunkManager.callGetChunkFuture(x, z, ChunkStatus.FULL, false).join();
+        Either<Chunk,ChunkHolder.Unloaded> either = chunkManager.ic$callGetChunkFuture(x, z, ChunkStatus.FULL, false).join();
         return either.left();
     }
 
