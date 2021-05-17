@@ -59,8 +59,11 @@ public class PlayerManager {
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
         BlockUpdateMap toBeSent = new BlockUpdateMap();
 
-        List<Entity> entities = this.getEntitiesInRange(sourceView);
-        if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
+        List<Entity> entities;
+        try {
+            entities = this.getEntitiesInRange(sourceView);
+            if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
+        } catch (ConcurrentModificationException ignored) { entities = new ArrayList<>(0); } // Not such a big deal, we'll get the entities next tick
 
         BlockState atmosphereBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
