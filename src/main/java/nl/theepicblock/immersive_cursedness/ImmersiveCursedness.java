@@ -8,8 +8,11 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.LiteralText;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ImmersiveCursedness implements ModInitializer {
+    public static final Logger LOGGER = LogManager.getLogger("ImmersiveCursedness");
     public static Thread cursednessThread;
     public static CursednessServer cursednessServer;
 

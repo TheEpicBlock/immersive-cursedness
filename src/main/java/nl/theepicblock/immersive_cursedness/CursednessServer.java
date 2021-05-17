@@ -3,6 +3,7 @@ package nl.theepicblock.immersive_cursedness;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ public class CursednessServer {
     }
 
     public void start() {
-        System.out.println("Starting immersive cursedness thread");
+        ImmersiveCursedness.LOGGER.info("Starting immersive cursedness thread");
         while (isServerActive) {
             long currentTime = System.currentTimeMillis();
             if (currentTime < nextTick) {
@@ -34,15 +35,15 @@ public class CursednessServer {
                 tick();
                 tickCount++;
             } catch (Exception e) {
-                System.out.println("Exception occurred whilst ticking the immersive cursedness thread");
-                e.printStackTrace();
+                ImmersiveCursedness.LOGGER.warn("Exception occurred whilst ticking the immersive cursedness thread. You can probably ignore this");
+                ImmersiveCursedness.LOGGER.info(e);
             }
             nextTick = System.currentTimeMillis()+50;
         }
     }
 
     public void stop() {
-        System.out.println("Stopping immersive cursedness thread");
+        ImmersiveCursedness.LOGGER.info("Stopping immersive cursedness thread");
         isServerActive = false;
     }
 
