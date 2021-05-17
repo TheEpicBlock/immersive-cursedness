@@ -70,11 +70,11 @@ public class PlayerManager {
 
         if (player.hasNetherPortalCooldown())return;
 
-        ((PlayerInterface)player).setCloseToPortal(false);
+        boolean isCloseToPortal = false;
         //iterate through all portals
         for (Portal portal : portalManager.getPortals()) {
             if (portal.isCloserThan(player.getPos(), 6)) {
-                ((PlayerInterface)player).setCloseToPortal(true);
+                isCloseToPortal = true;
             }
             TransformProfile transformProfile = portal.getTransformProfile();
             if (transformProfile == null) continue;
@@ -140,6 +140,7 @@ public class PlayerManager {
                 });
             }
         }
+        ((PlayerInterface)player).setCloseToPortal(isCloseToPortal);
 
         //get all of the old blocks and remove them
         blockCache.purge(sentBlocks, sentLayers, (pos, cachedState) -> {
