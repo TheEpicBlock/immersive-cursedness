@@ -93,7 +93,7 @@ public class TransformProfile {
 
     public BlockState transformAndGetFromWorld(BlockPos pos, ServerWorld world) {
         BlockPos transformedPos = this.transform(pos);
-        BlockState state = Util.getBlockAsync(world, pos);
+        BlockState state = Util.getBlockAsync(world, transformedPos);
         return this.rotateState(state);
     }
 
