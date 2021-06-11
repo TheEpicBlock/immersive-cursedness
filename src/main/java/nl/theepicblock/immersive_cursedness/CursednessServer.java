@@ -5,6 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +35,10 @@ public class CursednessServer {
             try {
                 tick();
                 tickCount++;
+            } catch (ConcurrentModificationException ignored) {
             } catch (Exception e) {
-                ImmersiveCursedness.LOGGER.warn("Exception occurred whilst ticking the immersive cursedness thread. You can probably ignore this");
-                ImmersiveCursedness.LOGGER.info(e);
+                ImmersiveCursedness.LOGGER.warn("Exception occurred whilst ticking the immersive cursedness thread. This is probably not bad unless it's spamming your console");
+                e.printStackTrace();
             }
             nextTick = System.currentTimeMillis()+50;
         }

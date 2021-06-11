@@ -3,12 +3,13 @@ package nl.theepicblock.immersive_cursedness.objects;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import nl.theepicblock.immersive_cursedness.mixin.ChunkDeltaUpdateAccessor;
 
 public class BlockUpdateMap extends Long2ObjectOpenHashMap<Short2ObjectMap<BlockState>> {
     public void put(BlockPos p, BlockState t) {
@@ -29,14 +30,16 @@ public class BlockUpdateMap extends Long2ObjectOpenHashMap<Short2ObjectMap<Block
 
     public void sendTo(ServerPlayerEntity player) {
         this.forEach((chunkSection, chunkContents) -> {
-            ChunkDeltaUpdateS2CPacket packet = new ChunkDeltaUpdateS2CPacket();
-            ChunkDeltaUpdateAccessor accessor = (ChunkDeltaUpdateAccessor)packet;
+            var buf = PacketByteBufs.create();
+            buf.writeLong(chunkSection);
+            buf.writeBoolean(false);
+            buf.writeVarInt(chunkContents.size());
 
-            accessor.ic$setSectionPos(ChunkSectionPos.from(chunkSection));
-            accessor.ic$setPositions(chunkContents.keySet().toShortArray());
-            accessor.ic$setBlockStates(chunkContents.values().toArray(new BlockState[0]));
-            accessor.ic$setField_26749(false);
+            for (Short2ObjectMap.Entry<BlockState> entry : chunkContents.short2ObjectEntrySet()) {
+                buf.writeVarLong(((long)Block.getRawIdFromState(entry.getValue()) << 12 | entry.getShortKey()));
+            }
 
+            ChunkDeltaUpdateS2CPacket packet = new ChunkDeltaUpdateS2CPacket(buf);
             player.networkHandler.sendPacket(packet);
         });
     }

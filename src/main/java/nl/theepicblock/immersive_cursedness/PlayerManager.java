@@ -1,19 +1,24 @@
 package nl.theepicblock.immersive_cursedness;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.TypeFilter;
 import net.minecraft.util.collection.TypeFilterableList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
 import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
 import nl.theepicblock.immersive_cursedness.objects.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -61,7 +66,7 @@ public class PlayerManager {
 
         List<Entity> entities;
         try {
-            entities = this.getEntitiesInRange(sourceView);
+            entities = this.getEntitiesInRange(sourceWorld);
             if (tickCount % 200 == 0) removeNoLongerExistingEntities(entities);
         } catch (ConcurrentModificationException ignored) { entities = new ArrayList<>(0); } // Not such a big deal, we'll get the entities next tick
 
@@ -101,9 +106,7 @@ public class PlayerManager {
                             }
                         }
                         //If we've reached this point. The entity isn't hidden yet. So we should hide it
-                        EntityPositionS2CPacket packet = new EntityPositionS2CPacket(entity);
-                        ((EntityPositionS2CPacketAccessor)packet).ic$setX(entity.getX() + 50);
-                        ((EntityPositionS2CPacketAccessor)packet).ic$setY(Double.MAX_VALUE);
+                        EntityPositionS2CPacket packet = createEntityPacket(entity, entity.getX() + 50, Double.MAX_VALUE);
                         player.networkHandler.sendPacket(packet);
                         hiddenEntities.add(entity.getUuid());
                         return true;
@@ -200,20 +203,50 @@ public class PlayerManager {
         packetStorage.sendTo(this.player);
     }
 
-    private List<Entity> getEntitiesInRange(AsyncWorldView world) {
-        return ChunkPos.stream(new ChunkPos(player.getBlockPos()), config.renderDistance).flatMap((chunkPos) -> {
-            Chunk chunk = world.getChunk(chunkPos);
-            if (chunk instanceof WorldChunk) {
-                WorldChunk worldChunk = (WorldChunk)chunk;
-                return Arrays.stream(worldChunk.getEntitySectionArray()).flatMap((Function<TypeFilterableList<Entity>,Stream<Entity>>)Collection::stream);
-            } else {
-                return Stream.empty();
-            }
-        }).collect(Collectors.toList());
+    private List<Entity> getEntitiesInRange(ServerWorld world) {
+        return world.getEntitiesByType(
+                new AllExceptPlayer(),
+                new Box(
+                        player.getX() - config.renderDistance*16,
+                        player.getY() - config.renderDistance*16,
+                        player.getZ() - config.renderDistance*16,
+                        player.getX() + config.renderDistance*16,
+                        player.getY() + config.renderDistance*16,
+                        player.getZ() + config.renderDistance*16
+                ),
+                (entity) -> true
+        );
     }
 
     private void removeNoLongerExistingEntities(List<Entity> existingEntities) {
         hiddenEntities.removeIf((uuid) ->
                 existingEntities.stream().noneMatch(entity -> uuid.equals(entity.getUuid())));
+    }
+
+    private static EntityPositionS2CPacket createEntityPacket(Entity entity, double x, double y) {
+        var buf = PacketByteBufs.create();
+        buf.writeVarInt(entity.getId());
+        buf.writeDouble(x);
+        buf.writeDouble(y);
+        buf.writeDouble(entity.getZ());
+        buf.writeByte((byte)((int)(entity.getYaw() * 256.0F / 360.0F)));
+        buf.writeByte((byte)((int)(entity.getPitch() * 256.0F / 360.0F)));
+        buf.writeBoolean(false);
+
+        return new EntityPositionS2CPacket(buf);
+    }
+
+    private static class AllExceptPlayer implements TypeFilter<Entity, Entity> {
+
+        @Nullable
+        @Override
+        public Entity downcast(Entity obj) {
+            return obj;
+        }
+
+        @Override
+        public Class<? extends Entity> getBaseClass() {
+            return Entity.class;
+        }
     }
 }

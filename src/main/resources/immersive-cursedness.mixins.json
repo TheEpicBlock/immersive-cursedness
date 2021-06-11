@@ -2,7 +2,7 @@
   "required": false,
   "minVersion": "0.8",
   "package": "nl.theepicblock.immersive_cursedness.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
     "ChunkDeltaUpdateAccessor",
     "EntityPositionS2CPacketAccessor",

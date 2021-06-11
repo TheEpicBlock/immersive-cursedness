@@ -2,7 +2,7 @@ package nl.theepicblock.immersive_cursedness.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -57,15 +57,15 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 		return this.getServerWorld();
 	}
 
-	@Inject(method = "writeCustomDataToTag", at = @At("HEAD"))
-	public void writeInject(CompoundTag tag, CallbackInfo ci) {
+	@Inject(method = "writeCustomDataToNbt", at = @At("HEAD"))
+	public void writeInject(NbtCompound tag, CallbackInfo ci) {
 		if (enabled == false) {
 			tag.putBoolean("immersivecursednessenabled", enabled);
 		}
 	}
 
-	@Inject(method = "readCustomDataFromTag", at = @At("HEAD"))
-	public void readInject(CompoundTag tag, CallbackInfo ci) {
+	@Inject(method = "readCustomDataFromNbt", at = @At("HEAD"))
+	public void readInject(NbtCompound tag, CallbackInfo ci) {
 		if (tag.contains("immersivecursednessenabled")) {
 			enabled = tag.getBoolean("immersivecursednessenabled");
 		}

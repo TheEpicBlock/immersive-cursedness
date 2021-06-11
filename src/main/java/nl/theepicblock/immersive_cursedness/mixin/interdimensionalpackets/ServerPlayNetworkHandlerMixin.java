@@ -64,7 +64,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
 			ServerWorld destination = Util.getDestination(player);
 			Direction placementSide = hitResult.getSide();
 			this.player.updateLastActionTime();
-			if (newPos.getY() < this.server.getWorldHeight()) {
+			int worldHeight = this.player.getServerWorld().getHeight();
+			if (newPos.getY() < worldHeight) {
 				if (this.requestedTeleportPos == null && this.player.squaredDistanceTo((double)oldPos.getX() + 0.5D, (double)oldPos.getY() + 0.5D, (double)oldPos.getZ() + 0.5D) < 64.0D && destination.canPlayerModifyAt(this.player, newPos)) {
 					Hand hand = packet.getHand();
 					ItemStack holding = this.player.getStackInHand(hand);
@@ -72,8 +73,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
 						((PlayerInterface)player).fakeWorld(destination);
 						ActionResult actionResult = this.player.interactionManager.interactBlock(this.player, destination, holding, hand, new BlockHitResult(Util.add(Util.getCenter(newPos),placementSide,0.5), placementSide, newPos, hitResult.isInsideBlock()));
 						((PlayerInterface)player).deFakeWorld();
-						if (!actionResult.isAccepted() && placementSide == Direction.UP && newPos.getY() >= this.server.getWorldHeight() - 1 && canPlace(this.player, holding)) {
-							Text text = (new TranslatableText("build.tooHigh", this.server.getWorldHeight())).formatted(Formatting.RED);
+						if (!actionResult.isAccepted() && placementSide == Direction.UP && newPos.getY() >= worldHeight - 1 && canPlace(this.player, holding)) {
+							Text text = (new TranslatableText("build.tooHigh", worldHeight)).formatted(Formatting.RED);
 							this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text, MessageType.GAME_INFO, net.minecraft.util.Util.NIL_UUID));
 						} else if (actionResult.shouldSwingHand()) {
 							this.player.swingHand(hand, true);
@@ -81,7 +82,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 					});
 				}
 			} else {
-				Text text2 = (new TranslatableText("build.tooHigh", this.server.getWorldHeight())).formatted(Formatting.RED);
+				Text text2 = (new TranslatableText("build.tooHigh", worldHeight)).formatted(Formatting.RED);
 				this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text2, MessageType.GAME_INFO, net.minecraft.util.Util.NIL_UUID));
 			}
 

@@ -108,7 +108,7 @@ public class PortalManager {
 
     private TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
         DummyEntity dummyEntity = new DummyEntity(((PlayerInterface)player).getUnfakedWorld(), pos);
-        dummyEntity.setYaw(0);
+        dummyEntity.setBodyYaw(0);
         portalForcerMixinActivate = true;
         TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);
         portalForcerMixinActivate = false;
