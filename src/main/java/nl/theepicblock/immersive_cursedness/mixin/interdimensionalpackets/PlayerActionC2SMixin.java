@@ -11,7 +11,7 @@ import static net.minecraft.util.math.BlockPos.*;
 
 @Mixin(PlayerActionC2SPacket.class)
 public class PlayerActionC2SMixin {
-	@Redirect(method = "read", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketByteBuf;readBlockPos()Lnet/minecraft/util/math/BlockPos;"))
+	@Redirect(method = "<init>(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketByteBuf;readBlockPos()Lnet/minecraft/util/math/BlockPos;"))
 	public BlockPos readBlockPosAsMutable(PacketByteBuf packetByteBuf) {
 		long l = packetByteBuf.readLong();
 		return new BlockPos.Mutable(unpackLongX(l), unpackLongY(l), unpackLongZ(l));
