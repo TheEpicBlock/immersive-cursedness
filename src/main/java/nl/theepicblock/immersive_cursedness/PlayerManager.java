@@ -8,22 +8,13 @@ import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
-import net.minecraft.util.collection.TypeFilterableList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
-import nl.theepicblock.immersive_cursedness.mixin.EntityPositionS2CPacketAccessor;
 import nl.theepicblock.immersive_cursedness.objects.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PlayerManager {
     private final Config config;
@@ -115,7 +106,7 @@ public class PlayerManager {
                 });
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
-                rect2.iterateClamped(player.getPos(), config.horizontalSendLimit, Util.min(sourceWorld, destinationWorld), (pos) -> {
+                rect2.iterateClamped(player.getPos(), config.horizontalSendLimit, Util.calculateMinMax(sourceWorld, destinationWorld, transformProfile), (pos) -> {
                     double dist = Util.getDistance(pos, portal.getLowerLeft());
                     if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 

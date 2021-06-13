@@ -21,6 +21,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.poi.PointOfInterest;
 import nl.theepicblock.immersive_cursedness.mixin.ServerChunkManagerInvoker;
+import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
 
 import java.util.Optional;
 
@@ -161,8 +162,17 @@ public class Util {
         return ImmersiveCursedness.cursednessServer.getManager(player);
     }
 
-    public static WorldHeights min(HeightLimitView a, HeightLimitView b) {
-        return new WorldHeights(Math.max(a.getBottomY(), b.getBottomY()), Math.min(a.getTopY(), b.getTopY()));
+    public static WorldHeights calculateMinMax(HeightLimitView source, HeightLimitView destination, TransformProfile t) {
+        int lower = source.getBottomY();
+        int top = source.getTopY();
+        int destinationLower = t.transformYOnly(lower);
+        int destinationTop = t.transformYOnly(top);
+        destinationLower = Math.max(destinationLower, destination.getBottomY());
+        destinationTop = Math.min(destinationTop, destination.getTopY());
+        destinationLower = t.unTransformYOnly(destinationLower);
+        destinationTop = t.unTransformYOnly(destinationTop);
+
+        return new WorldHeights(Math.max(lower, destinationLower), Math.min(top, destinationTop));
     }
 
     public record WorldHeights(int min, int max) {}

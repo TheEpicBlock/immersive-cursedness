@@ -22,6 +22,14 @@ public class TransformProfile {
         this.rotation = rotation;
     }
 
+    public int transformYOnly(int y) {
+        return y+transform.getY();
+    }
+
+    public int unTransformYOnly(int y) {
+        return y-transform.getY();
+    }
+
     public BlockPos transform(BlockPos in) {
         ImPos pos = new ImPos(
                 in.getX()+transform.getX()-target.getX(),
