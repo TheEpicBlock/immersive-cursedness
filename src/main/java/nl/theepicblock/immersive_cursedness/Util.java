@@ -15,6 +15,7 @@ import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -159,4 +160,10 @@ public class Util {
     public static PlayerManager getManagerFromPlayer(ServerPlayerEntity player) {
         return ImmersiveCursedness.cursednessServer.getManager(player);
     }
+
+    public static WorldHeights min(HeightLimitView a, HeightLimitView b) {
+        return new WorldHeights(Math.max(a.getBottomY(), b.getBottomY()), Math.min(a.getTopY(), b.getTopY()));
+    }
+
+    public record WorldHeights(int min, int max) {}
 }

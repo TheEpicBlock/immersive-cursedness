@@ -72,8 +72,8 @@ public class RectangleWithCutoutCorners extends FlatStandingRectangle{
 	}
 
 	@Override
-	public void iterateClamped(Vec3d center, int limit, Consumer<BlockPos> predicate) {
-		super.iterateClamped(center, limit, (pos) -> {
+	public void iterateClamped(Vec3d center, int limit, Util.WorldHeights world, Consumer<BlockPos> predicate) {
+		super.iterateClamped(center, limit, world, (pos) -> {
 			if (this.contains(Util.getCenter(pos))) {
 				predicate.accept(pos);
 			}

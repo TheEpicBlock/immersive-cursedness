@@ -115,7 +115,7 @@ public class PlayerManager {
                 });
 
                 //go through all blocks in this layer and use the transformProfile to get the correct block in the nether. Then send it to the client
-                rect2.iterateClamped(player.getPos(), config.horizontalSendLimit, (pos) -> {
+                rect2.iterateClamped(player.getPos(), config.horizontalSendLimit, Util.min(sourceWorld, destinationWorld), (pos) -> {
                     double dist = Util.getDistance(pos, portal.getLowerLeft());
                     if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 

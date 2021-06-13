@@ -5,6 +5,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.HeightLimitView;
+import net.minecraft.world.World;
 import nl.theepicblock.immersive_cursedness.Util;
 
 import java.util.function.Consumer;
@@ -47,14 +49,14 @@ public class FlatStandingRectangle {
         return createBlockPos(top-1, right-1);
     }
 
-    public BlockPos getBottomLeftBlockClamped(Vec3d center, int limit) {
+    public BlockPos getBottomLeftBlockClamped(Vec3d center, int limit, HeightLimitView world) {
         double centerP = Util.get(center, Util.rotate(axis));
-        return createBlockPos(clamp(bottom,0,255), clamp(left,centerP-limit,centerP+limit));
+        return createBlockPos(clamp(bottom, world.getBottomY(), world.getTopY()), clamp(left,centerP-limit,centerP+limit));
     }
 
-    public BlockPos getTopRightBlockClamped(Vec3d center, int limit) {
+    public BlockPos getTopRightBlockClamped(Vec3d center, int limit, HeightLimitView world) {
         double centerP = Util.get(center, Util.rotate(axis));
-        return createBlockPos(clamp(top-1,0,255), clamp(right-1,centerP-limit,centerP+limit));
+        return createBlockPos(clamp(top-1, world.getBottomY(), world.getTopY()), clamp(right-1,centerP-limit,centerP+limit));
     }
 
     public FlatStandingRectangle expand(int i, Vec3d source) {
@@ -98,12 +100,12 @@ public class FlatStandingRectangle {
                 Util.get(pos, axis) > this.other;
     }
 
-    public void iterateClamped(Vec3d center, int limit, Consumer<BlockPos> predicate) {
+    public void iterateClamped(Vec3d center, int limit, Util.WorldHeights world, Consumer<BlockPos> predicate) {
         double centerP = Util.get(center, Util.rotate(axis));
         int left = (int)Math.round(clamp(this.left,centerP-limit,centerP+limit));
         int right = (int)Math.round(clamp(this.right-1,centerP-limit,centerP+limit));
-        int top = (int)Math.round(clamp(this.top-1,0,255));
-        int bottom = (int)Math.round(clamp(this.bottom,0,255));
+        int top = (int)Math.round(clamp(this.top-1, world.min(), world.max()));
+        int bottom = (int)Math.round(clamp(this.bottom, world.min(), world.max()));
 
         if (left == right) return;
 
