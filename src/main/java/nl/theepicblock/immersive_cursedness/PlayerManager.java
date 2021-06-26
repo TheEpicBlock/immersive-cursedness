@@ -160,7 +160,7 @@ public class PlayerManager {
 
     public BlockPos transform(BlockPos p) {
         for (Portal portal : portalManager.getPortals()) {
-            if (portal.isBlockposBehind(p, player.getPos())) {
+            if (portal.isBlockposBehind(p, player.getPos()) && portal.getTransformProfile() != null) {
                 return portal.getTransformProfile().transform(p);
             }
         }
@@ -169,7 +169,7 @@ public class PlayerManager {
 
     public TransformProfile getTransformProfile(BlockPos p) {
         for (Portal portal : portalManager.getPortals()) {
-            if (portal.isBlockposBehind(p, player.getPos())) {
+            if (portal.isBlockposBehind(p, player.getPos()) && portal.getTransformProfile() != null) {
                 return portal.getTransformProfile();
             }
         }
