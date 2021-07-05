@@ -1,4 +1,5 @@
 plugins {
+	id "com.modrinth.minotaur" version "1.2.1"
 	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
 }
@@ -34,6 +35,29 @@ processResources {
 
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version
+	}
+}
+
+task publishModrinth (type: com.modrinth.minotaur.TaskModrinthUpload, dependsOn: remapJar) {
+	doFirst {
+		var modrinthToken = System.getenv("MODRINTH_TOKEN")
+		var changelogEnv = System.getenv("CHANGELOG")
+		var versionNameEnv = System.getenv("NAME")
+		if (modrinthToken == null || changelogEnv == null) {
+			throw new RuntimeException("Didn't find correct env variables")
+		}
+
+		token = modrinthToken
+		// An environment property called MODRINTH that is your token, set via Gradle CLI, GitHub Actions, Idea Run Configuration, or other
+		projectId = project.modrinth_project
+		uploadFile = remapJar
+
+		addLoader('fabric')
+		addGameVersion(project.minecraft_version)
+
+		versionNumber = project.mod_version
+		versionName = versionNameEnv
+		changelog = changelogEnv
 	}
 }
 
