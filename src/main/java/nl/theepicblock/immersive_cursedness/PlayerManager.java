@@ -180,7 +180,7 @@ public class PlayerManager {
         BlockUpdateMap packetStorage = new BlockUpdateMap();
         ((PlayerInterface)player).setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {
-            BlockState originalBlock = Util.getBlockAsync(player.getServerWorld(), pos);
+            BlockState originalBlock = Util.getBlockAsync((ServerWorld)player.getWorld(), pos);
             if (originalBlock != cachedState) {
                 packetStorage.put(pos, originalBlock);
             }
@@ -188,7 +188,7 @@ public class PlayerManager {
         });
         for (Portal portal : portalManager.getPortals()) {
             BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getServerWorld(), pos));
+                packetStorage.put(pos.toImmutable(), Util.getBlockAsync((ServerWorld)player.getWorld(), pos));
             });
         }
         packetStorage.sendTo(this.player);

@@ -23,8 +23,6 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 		super(world, pos, yaw, profile);
 	}
 
-	@Shadow public abstract ServerWorld getServerWorld();
-
 	@Unique private volatile boolean isCloseToPortal;
 	@Unique private World unFakedWorld;
 	@Unique private boolean enabled = true;
@@ -54,7 +52,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 	@Override
 	public ServerWorld getUnfakedWorld() {
 		if (unFakedWorld != null) return (ServerWorld)unFakedWorld;
-		return this.getServerWorld();
+		return (ServerWorld) getWorld();
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("HEAD"))
