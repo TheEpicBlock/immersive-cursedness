@@ -12,7 +12,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.PortalUtil;
+import net.minecraft.world.BlockLocating;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
@@ -67,14 +67,15 @@ public class DummyEntity extends Entity {
         } else {
             double coordinateScale = DimensionType.getCoordinateScaleFactor(this.world.getDimension(), destination.getDimension());
             BlockPos blockPos3 = new BlockPos(this.getX() * coordinateScale, this.getY(), this.getZ() * coordinateScale);
-            Optional<PortalUtil.Rectangle> portalPosA = this.getPortalRect(destination, blockPos3, bl3);
+            WorldBorder worldBorder = destination.getWorldBorder();
+            Optional<BlockLocating.Rectangle> portalPosA = this.getPortalRect(destination, blockPos3, bl3, worldBorder);
             if (portalPosA.isPresent()) {
                 BlockState blockState = Util.getBlockAsync((ServerWorld)this.world, this.lastNetherPortalPosition);
                 Direction.Axis axis2;
                 Vec3d vec3d2;
                 if (blockState.contains(Properties.HORIZONTAL_AXIS)) {
                     axis2 = blockState.get(Properties.HORIZONTAL_AXIS);
-                    PortalUtil.Rectangle portalPos = PortalUtil.getLargestRectangle(this.lastNetherPortalPosition, axis2, 21, Direction.Axis.Y, 21, (blockPos) -> Util.getBlockAsync((ServerWorld)this.world, blockPos) == blockState);
+                    BlockLocating.Rectangle portalPos = BlockLocating.getLargestRectangle(this.lastNetherPortalPosition, axis2, 21, Direction.Axis.Y, 21, (blockPos) -> Util.getBlockAsync((ServerWorld)this.world, blockPos) == blockState);
                     vec3d2 = this.positionInPortal(axis2, portalPos);
                 } else {
                     return null;

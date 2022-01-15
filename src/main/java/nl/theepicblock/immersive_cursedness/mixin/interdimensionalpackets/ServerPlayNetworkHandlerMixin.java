@@ -64,7 +64,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 			ServerWorld destination = Util.getDestination(player);
 			Direction placementSide = hitResult.getSide();
 			this.player.updateLastActionTime();
-			int worldHeight = this.player.getServerWorld().getHeight();
+			int worldHeight = ( (ServerWorld) this.player.getWorld() ).getHeight();
 			if (newPos.getY() < worldHeight) {
 				if (this.requestedTeleportPos == null && this.player.squaredDistanceTo((double)oldPos.getX() + 0.5D, (double)oldPos.getY() + 0.5D, (double)oldPos.getZ() + 0.5D) < 64.0D && destination.canPlayerModifyAt(this.player, newPos)) {
 					Hand hand = packet.getHand();

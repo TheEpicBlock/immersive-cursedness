@@ -28,13 +28,13 @@ public class MixinInteractionManager {
 			if (manager == null) return;
 			BlockPos z = manager.transform(pos);
 			if (z == null) {
-				this.world = player.getServerWorld();
+				this.world = (ServerWorld)player.getWorld();
 			} else {
 				((BlockPos.Mutable)pos).set(z.getX(), z.getY(), z.getZ());
 				this.world = Util.getDestination(player);
 			}
 		} else {
-			this.world = player.getServerWorld();
+			this.world = (ServerWorld)player.getWorld();
 		}
 	}
 }
