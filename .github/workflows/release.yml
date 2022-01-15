@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  build:
+  upload:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,22 +31,12 @@ jobs:
       - name: Build
         run: ./gradlew build
 
-  github-release:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-    steps:
       - name: Upload GitHub release
         uses: AButler/upload-release-assets@v2.0
         with:
           files: 'build/libs/*.jar;!build/libs/*-sources.jar;!build/libs/*-dev.jar'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-  modrinth-upload:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-    steps:
       - name: Publish to Modrinth
         run: ./gradlew publishModrinth
         env:
