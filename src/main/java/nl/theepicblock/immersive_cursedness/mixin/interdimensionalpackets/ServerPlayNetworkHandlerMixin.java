@@ -3,9 +3,8 @@ package nl.theepicblock.immersive_cursedness.mixin.interdimensionalpackets;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -13,7 +12,6 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -21,7 +19,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.util.registry.Registry;
 import nl.theepicblock.immersive_cursedness.PlayerInterface;
 import nl.theepicblock.immersive_cursedness.PlayerManager;
 import nl.theepicblock.immersive_cursedness.Util;
@@ -31,7 +29,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
@@ -74,16 +71,22 @@ public abstract class ServerPlayNetworkHandlerMixin {
 						ActionResult actionResult = this.player.interactionManager.interactBlock(this.player, destination, holding, hand, new BlockHitResult(Util.add(Util.getCenter(newPos),placementSide,0.5), placementSide, newPos, hitResult.isInsideBlock()));
 						((PlayerInterface)player).deFakeWorld();
 						if (!actionResult.isAccepted() && placementSide == Direction.UP && newPos.getY() >= worldHeight - 1 && canPlace(this.player, holding)) {
-							Text text = (new TranslatableText("build.tooHigh", worldHeight)).formatted(Formatting.RED);
-							this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text, MessageType.GAME_INFO, net.minecraft.util.Util.NIL_UUID));
+							Text text = (Text.translatable("build.tooHigh", worldHeight)).formatted(Formatting.RED);
+							// TODO: Is this mess correct?
+							Registry<MessageType> registry = this.player.getWorld().getRegistryManager().get(Registry.MESSAGE_TYPE_KEY);
+							int packetType = registry.getRawId(registry.get(MessageType.GAME_INFO));
+							this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text, packetType));
 						} else if (actionResult.shouldSwingHand()) {
 							this.player.swingHand(hand, true);
 						}
 					});
 				}
 			} else {
-				Text text2 = (new TranslatableText("build.tooHigh", worldHeight)).formatted(Formatting.RED);
-				this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text2, MessageType.GAME_INFO, net.minecraft.util.Util.NIL_UUID));
+				Text text2 = (Text.translatable("build.tooHigh", worldHeight)).formatted(Formatting.RED);
+				// TODO: Is this mess correct?
+				Registry<MessageType> registry = this.player.getWorld().getRegistryManager().get(Registry.MESSAGE_TYPE_KEY);
+				int packetType = registry.getRawId(registry.get(MessageType.GAME_INFO));
+				this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text2, packetType));
 			}
 
 			this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos, transformProfile.rotateState(Util.getBlockAsync(destination, newPos))));

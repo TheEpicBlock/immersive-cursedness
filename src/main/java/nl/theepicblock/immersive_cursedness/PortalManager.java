@@ -10,7 +10,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
-import net.minecraft.world.poi.PointOfInterestType;
+import net.minecraft.world.poi.PointOfInterestTypes;
 import nl.theepicblock.immersive_cursedness.objects.DummyEntity;
 import nl.theepicblock.immersive_cursedness.objects.Portal;
 import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
@@ -142,7 +142,7 @@ public class PortalManager {
 
     private static Stream<PointOfInterest> getPortalsInChunkRadius(PointOfInterestStorage storage, BlockPos pos, int radius) {
         return ChunkPos.stream(new ChunkPos(pos), radius).flatMap((chunkPos) -> {
-            return storage.getInChunk((poi) -> poi == PointOfInterestType.NETHER_PORTAL, chunkPos, PointOfInterestStorage.OccupationStatus.ANY);
+            return storage.getInChunk((poi) -> poi.matchesKey(PointOfInterestTypes.NETHER_PORTAL), chunkPos, PointOfInterestStorage.OccupationStatus.ANY);
         });
     }
 }
