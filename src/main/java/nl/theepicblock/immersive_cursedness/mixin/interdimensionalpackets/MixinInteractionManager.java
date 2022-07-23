@@ -21,8 +21,8 @@ public class MixinInteractionManager {
 
 	@Shadow public ServerWorld world;
 
-	@Inject(method = "processBlockBreakingAction", at = @At(value = "INVOKE",shift = At.Shift.AFTER,target = "Lnet/minecraft/util/math/BlockPos;getZ()I"))
-	public void breakInject(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, CallbackInfo ci) {
+	@Inject(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
+	public void breakInject(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
 		if (PlayerInterface.isCloseToPortal(player)) {
 			PlayerManager manager = Util.getManagerFromPlayer(player);
 			if (manager == null) return;
