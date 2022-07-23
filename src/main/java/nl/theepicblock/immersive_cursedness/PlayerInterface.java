@@ -5,17 +5,17 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
 public interface PlayerInterface {
-	void setCloseToPortal(boolean v);
-	boolean getCloseToPortal();
+	void immersivecursedness$setCloseToPortal(boolean v);
+	boolean immersivecursedness$getCloseToPortal();
 
 	static boolean isCloseToPortal(ServerPlayerEntity player) {
-		return ((PlayerInterface)player).getCloseToPortal();
+		return ((PlayerInterface)player).immersivecursedness$getCloseToPortal();
 	}
 
-	void fakeWorld(World world);
-	void deFakeWorld();
-	ServerWorld getUnfakedWorld();
+	void immersivecursedness$fakeWorld(World world);
+	void immersivecursedness$deFakeWorld();
+	ServerWorld immersivecursedness$getUnfakedWorld();
 
-	void setEnabled(boolean v);
-	boolean getEnabled();
+	void immersivecursedness$setEnabled(boolean v);
+	boolean immersivecursedness$getEnabled();
 }

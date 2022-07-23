@@ -9,6 +9,8 @@ import net.minecraft.util.math.Direction;
 import nl.theepicblock.immersive_cursedness.PlayerInterface;
 import nl.theepicblock.immersive_cursedness.PlayerManager;
 import nl.theepicblock.immersive_cursedness.Util;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,24 +19,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerInteractionManager.class)
 public class MixinInteractionManager {
-	@Shadow public ServerPlayerEntity player;
+	@Final
+	@Shadow
+	protected ServerPlayerEntity player;
 
-	@Shadow public ServerWorld world;
+	@Shadow
+	protected ServerWorld world;
 
-	@Inject(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
+	@Inject(method = "processBlockBreakingAction", at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC, target = "Lnet/minecraft/network/packet/c2s/play/PlayerActionC2SPacket$Action;START_DESTROY_BLOCK:Lnet/minecraft/network/packet/c2s/play/PlayerActionC2SPacket$Action;"))
 	public void breakInject(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
 		if (PlayerInterface.isCloseToPortal(player)) {
 			PlayerManager manager = Util.getManagerFromPlayer(player);
 			if (manager == null) return;
 			BlockPos z = manager.transform(pos);
 			if (z == null) {
-				this.world = (ServerWorld)player.getWorld();
+				this.world = player.getWorld();
 			} else {
 				((BlockPos.Mutable)pos).set(z.getX(), z.getY(), z.getZ());
 				this.world = Util.getDestination(player);
 			}
 		} else {
-			this.world = (ServerWorld)player.getWorld();
+			this.world = player.getWorld();
 		}
 	}
 }

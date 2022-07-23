@@ -1,34 +1,21 @@
 package nl.theepicblock.immersive_cursedness.mixin.interdimensionalpackets;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.message.MessageType;
+import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import nl.theepicblock.immersive_cursedness.PlayerInterface;
 import nl.theepicblock.immersive_cursedness.PlayerManager;
 import nl.theepicblock.immersive_cursedness.Util;
 import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
@@ -36,65 +23,66 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayNetworkHandlerMixin {
 	@Shadow public ServerPlayerEntity player;
 
-	@Shadow @Final private MinecraftServer server;
+	@Unique
+	private TransformProfile transformProfile;
 
-	@Shadow private int requestedTeleportId;
-
-	@Shadow private Vec3d requestedTeleportPos;
-
-	@Shadow
-	private static boolean canPlace(ServerPlayerEntity player, ItemStack stack) {
-		return false;
-	}
-
-	@Inject(method = "onPlayerInteractBlock", at = @At("HEAD"), cancellable = true)
-	public void onInteractBlock(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
-		if (PlayerInterface.isCloseToPortal(player)) {
+	@Inject(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V"))
+	public void setTransformProfile(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
+		if (PlayerInterface.isCloseToPortal(this.player)) {
 			PlayerManager manager = Util.getManagerFromPlayer(player);
-			if (manager == null) return;
-			BlockHitResult hitResult = packet.getBlockHitResult();
-			BlockPos oldPos = hitResult.getBlockPos();
-			TransformProfile transformProfile = manager.getTransformProfile(oldPos);
-			if (transformProfile == null) return;
-			BlockPos newPos = transformProfile.transform(oldPos);
-
-			ServerWorld destination = Util.getDestination(player);
-			Direction placementSide = hitResult.getSide();
-			this.player.updateLastActionTime();
-			int worldHeight = ( (ServerWorld) this.player.getWorld() ).getHeight();
-			if (newPos.getY() < worldHeight) {
-				if (this.requestedTeleportPos == null && this.player.squaredDistanceTo((double)oldPos.getX() + 0.5D, (double)oldPos.getY() + 0.5D, (double)oldPos.getZ() + 0.5D) < 64.0D && destination.canPlayerModifyAt(this.player, newPos)) {
-					Hand hand = packet.getHand();
-					ItemStack holding = this.player.getStackInHand(hand);
-					destination.getServer().execute(() -> {
-						((PlayerInterface)player).fakeWorld(destination);
-						ActionResult actionResult = this.player.interactionManager.interactBlock(this.player, destination, holding, hand, new BlockHitResult(Util.add(Util.getCenter(newPos),placementSide,0.5), placementSide, newPos, hitResult.isInsideBlock()));
-						((PlayerInterface)player).deFakeWorld();
-						if (!actionResult.isAccepted() && placementSide == Direction.UP && newPos.getY() >= worldHeight - 1 && canPlace(this.player, holding)) {
-							Text text = (Text.translatable("build.tooHigh", worldHeight)).formatted(Formatting.RED);
-							// TODO: Is this mess correct?
-							Registry<MessageType> registry = this.player.getWorld().getRegistryManager().get(Registry.MESSAGE_TYPE_KEY);
-							int packetType = registry.getRawId(registry.get(MessageType.GAME_INFO));
-							this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text, packetType));
-						} else if (actionResult.shouldSwingHand()) {
-							this.player.swingHand(hand, true);
-						}
-					});
+			if (manager != null) {
+				// Potentially dangerous with dimensional threading
+				var hitresult = packet.getBlockHitResult();
+				this.transformProfile = manager.getTransformProfile(hitresult.getBlockPos().offset(hitresult.getSide()));
+				if (transformProfile != null) {
+					((PlayerInterface)player).immersivecursedness$fakeWorld(Util.getDestination(player));
 				}
 			} else {
-				Text text2 = (Text.translatable("build.tooHigh", worldHeight)).formatted(Formatting.RED);
-				// TODO: Is this mess correct?
-				Registry<MessageType> registry = this.player.getWorld().getRegistryManager().get(Registry.MESSAGE_TYPE_KEY);
-				int packetType = registry.getRawId(registry.get(MessageType.GAME_INFO));
-				this.player.networkHandler.sendPacket(new GameMessageS2CPacket(text2, packetType));
+				transformProfile = null;
 			}
-
-			this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos, transformProfile.rotateState(Util.getBlockAsync(destination, newPos))));
-			BlockState offsetBlock = transformProfile.transformAndGetFromWorld(oldPos.offset(placementSide), destination);
-			if (offsetBlock.getBlock() != Blocks.NETHER_PORTAL) {
-				this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(oldPos.offset(placementSide), offsetBlock));
-			}
-			ci.cancel();
+		} else {
+			transformProfile = null;
 		}
+	}
+
+	@Redirect(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getWorld()Lnet/minecraft/server/world/ServerWorld;"))
+	public ServerWorld modifyWorld(ServerPlayerEntity player, PlayerInteractBlockC2SPacket packet) {
+		if (transformProfile != null) {
+			return Util.getDestination(player);
+		}
+		return player.getWorld();
+	}
+
+	@ModifyArg(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
+	public BlockPos modifyCanBreakCheck(BlockPos pos) {
+		if (transformProfile != null) {
+			return transformProfile.transform(pos);
+		}
+		return pos;
+	}
+
+	@ModifyArg(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
+	public Packet<?> modifyReturnPacket(Packet<?> packet) {
+		if (transformProfile != null && packet instanceof BlockUpdateS2CPacket blockUpdate) {
+			var oldPos = blockUpdate.getPos();
+			var newPos = transformProfile.transform(oldPos);
+			return new BlockUpdateS2CPacket(oldPos, player.world.getBlockState(newPos));
+		}
+		return packet;
+	}
+
+	@ModifyArg(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;interactBlock(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;"))
+	public BlockHitResult modifyUse(BlockHitResult original) {
+		if (transformProfile != null) {
+			var side = transformProfile.rotate(original.getSide());
+			return new BlockHitResult(transformProfile.transform(original.getPos()), side, transformProfile.transform(original.getBlockPos()), original.isInsideBlock());
+		}
+		return original;
+	}
+
+	@Inject(method = "onPlayerInteractBlock", at = @At("RETURN"))
+	public void clearPortalTransform(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
+ 		((PlayerInterface)player).immersivecursedness$deFakeWorld();
+		transformProfile = null;
 	}
 }

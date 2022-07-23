@@ -22,7 +22,7 @@ public abstract class InventoryDistanceMixin extends LockableContainerBlockEntit
 
 	@Inject(method = "canPlayerUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;squaredDistanceTo(DDD)D"), cancellable = true)
 	public void playerUseRedirect(PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
-		if (((PlayerInterface)player).getUnfakedWorld() != this.world) {
+		if (((PlayerInterface)player).immersivecursedness$getUnfakedWorld() != this.world) {
 			if (player instanceof ServerPlayerEntity) {
 				cir.setReturnValue(PlayerInterface.isCloseToPortal((ServerPlayerEntity)player));
 			}

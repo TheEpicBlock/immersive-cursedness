@@ -32,11 +32,11 @@ public class PlayerManager {
 
     @SuppressWarnings("ConstantConditions")
     public void tick(int tickCount) {
-        if (((PlayerInterface)player).getEnabled() == false) {
+        if (((PlayerInterface)player).immersivecursedness$getEnabled() == false) {
             return;
         }
 
-        ServerWorld sourceWorld = ((PlayerInterface)player).getUnfakedWorld();
+        ServerWorld sourceWorld = ((PlayerInterface)player).immersivecursedness$getUnfakedWorld();
         ServerWorld destinationWorld = Util.getDestination(sourceWorld);
         AsyncWorldView sourceView = new AsyncWorldView(sourceWorld);
         AsyncWorldView destinationView = new AsyncWorldView(destinationWorld);
@@ -134,7 +134,7 @@ public class PlayerManager {
                 });
             }
         }
-        ((PlayerInterface)player).setCloseToPortal(isCloseToPortal);
+        ((PlayerInterface)player).immersivecursedness$setCloseToPortal(isCloseToPortal);
 
         //get all of the old blocks and remove them
         blockCache.purge(sentBlocks, sentLayers, (pos, cachedState) -> {
@@ -178,7 +178,7 @@ public class PlayerManager {
 
     public void purgeCache() {
         BlockUpdateMap packetStorage = new BlockUpdateMap();
-        ((PlayerInterface)player).setCloseToPortal(false);
+        ((PlayerInterface)player).immersivecursedness$setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {
             BlockState originalBlock = Util.getBlockAsync((ServerWorld)player.getWorld(), pos);
             if (originalBlock != cachedState) {

@@ -27,29 +27,31 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 	@Unique private boolean enabled = true;
 
 	@Override
-	public void setCloseToPortal(boolean v) {
+	public void immersivecursedness$setCloseToPortal(boolean v) {
 		isCloseToPortal = v;
 	}
 
 	@Override
-	public boolean getCloseToPortal() {
+	public boolean immersivecursedness$getCloseToPortal() {
 		return isCloseToPortal;
 	}
 
 	@Override
-	public void fakeWorld(World world) {
+	public void immersivecursedness$fakeWorld(World world) {
 		unFakedWorld = this.world;
 		this.world = world;
 	}
 
 	@Override
-	public void deFakeWorld() {
-		this.world = unFakedWorld;
-		unFakedWorld = null;
+	public void immersivecursedness$deFakeWorld() {
+		if (unFakedWorld != null) {
+			this.world = unFakedWorld;
+			unFakedWorld = null;
+		}
 	}
 
 	@Override
-	public ServerWorld getUnfakedWorld() {
+	public ServerWorld immersivecursedness$getUnfakedWorld() {
 		if (unFakedWorld != null) return (ServerWorld)unFakedWorld;
 		return (ServerWorld) getWorld();
 	}
@@ -69,12 +71,12 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 	}
 
 	@Override
-	public void setEnabled(boolean v) {
+	public void immersivecursedness$setEnabled(boolean v) {
 		enabled = v;
 	}
 
 	@Override
-	public boolean getEnabled() {
+	public boolean immersivecursedness$getEnabled() {
 		return enabled;
 	}
 }

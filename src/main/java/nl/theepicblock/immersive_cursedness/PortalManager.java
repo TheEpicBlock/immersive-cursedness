@@ -31,7 +31,7 @@ public class PortalManager {
     }
 
     public void update() {
-        ServerWorld world = ((PlayerInterface)player).getUnfakedWorld();
+        ServerWorld world = ((PlayerInterface)player).immersivecursedness$getUnfakedWorld();
 
         Stream<PointOfInterest> portalStream = getPortalsInChunkRadius(world.getPointOfInterestStorage(), player.getBlockPos(), config.renderDistance);
         PointOfInterest[] portals = portalStream.toArray(PointOfInterest[]::new);
@@ -107,7 +107,7 @@ public class PortalManager {
     }
 
     private TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
-        DummyEntity dummyEntity = new DummyEntity(((PlayerInterface)player).getUnfakedWorld(), pos);
+        DummyEntity dummyEntity = new DummyEntity(((PlayerInterface)player).immersivecursedness$getUnfakedWorld(), pos);
         dummyEntity.setBodyYaw(0);
         portalForcerMixinActivate = true;
         TeleportTarget teleportTarget = dummyEntity.getTeleportTargetB(destination);

@@ -131,18 +131,18 @@ public class Util {
     }
 
     public static ServerWorld getDestination(ServerPlayerEntity player) {
-        return getDestination(((PlayerInterface)player).getUnfakedWorld());
+        return getDestination(((PlayerInterface)player).immersivecursedness$getUnfakedWorld());
     }
 
     public static ServerWorld getDestination(ServerWorld serverWorld) {
-        MinecraftServer minecraftServer = serverWorld.getServer();
-        RegistryKey<World> registryKey = serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER;
+        var minecraftServer = serverWorld.getServer();
+        var registryKey = serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER;
         return minecraftServer.getWorld(registryKey);
     }
 
     /**
      * Normally 0.5 gets added to the distance of blockpos. This method doesn't do that.
-     * @see Vec3i#getSquaredDistance(double, double, double, boolean)
+     * @see Vec3i#getSquaredDistance(Position)
      */
     public static double getDistance(BlockPos a, BlockPos b) {
         int x = a.getX() - b.getX();

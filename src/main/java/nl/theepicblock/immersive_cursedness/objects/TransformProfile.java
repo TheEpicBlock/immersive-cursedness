@@ -5,16 +5,27 @@ import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import nl.theepicblock.immersive_cursedness.Util;
 
 public class TransformProfile {
-    private final ImPos transform;
-    private final ImPos target;
+    private final int originalX;
+    private final int originalY;
+    private final int originalZ;
+    private final int targetX;
+    private final int targetY;
+    private final int targetZ;
     private final int rotation;
 
     public TransformProfile(BlockPos original, BlockPos target, int originalRot, int targetRot) {
-        this.transform = new ImPos(target.subtract(original));
-        this.target = new ImPos(target);
+        this.originalX = original.getX();
+        this.originalY = original.getY();
+        this.originalZ = original.getZ();
+        this.targetX = target.getX();
+        this.targetY = target.getY();
+        this.targetZ = target.getZ();
+
         int rotation = targetRot-originalRot;
         if (rotation == -270) rotation = 90;
         if (rotation == 270) rotation = -90;
@@ -23,117 +34,102 @@ public class TransformProfile {
     }
 
     public int transformYOnly(int y) {
-        return y+transform.getY();
+        return y-originalY+targetY;
     }
 
     public int unTransformYOnly(int y) {
-        return y-transform.getY();
+        return y-targetY+originalY;
     }
 
+    // rot(in - original) + target
     public BlockPos transform(BlockPos in) {
-        ImPos pos = new ImPos(
-                in.getX()+transform.getX()-target.getX(),
-                in.getY()+transform.getY()-target.getY(),
-                in.getZ()+transform.getZ()-target.getZ()
-        );
-        pos = rotate(pos);
-        return pos.addIntoBlockPos(target);
-    }
+        int x = in.getX();
+        int y = in.getY();
+        int z = in.getZ();
 
-    public BlockPos untransform(BlockPos in) {
-        ImPos pos = new ImPos(
-                in.getX()-target.getX(),
-                in.getY()-target.getY(),
-                in.getZ()-target.getZ()
-        );
-        pos = unrotate(pos);
+        // Swap x and z
+        if (this.rotation != 0) {
+            var temp = x;
+            x = z;
+            z = temp;
+        }
+
+        // We have to flip the x or the y their sign in certain situations
+        var rotbitX = (this.rotation == -90 || this.rotation == 180) ? -1 : 1;
+        var rotbitY = (this.rotation == 90 || this.rotation == 180) ? -1 : 1;
+
         return new BlockPos(
-                pos.x+target.getX()-transform.getX(),
-                pos.y+target.getY()-transform.getY(),
-                pos.z+target.getZ()-transform.getZ()
+                rotbitX * (x - originalX) + targetX,
+                (y - originalY) + targetY,
+                rotbitY * (z - originalZ) + targetZ
         );
     }
 
-    public ImPos rotate(ImPos in) {
-        switch (rotation) {
-            default:
-                return in;
-            case 90:
-                return new ImPos(-in.getZ(), in.getY(), in.getX());
-            case -90:
-                return new ImPos(in.getZ(), in.getY(), -in.getX());
-            case 180:
-                return new ImPos(-in.getZ(), in.getY(), -in.getX());
-        }
-    }
+    public Vec3d transform(Vec3d in) {
+        double x = in.getX();
+        double y = in.getY();
+        double z = in.getZ();
 
-    public ImPos unrotate(ImPos in) {
-        switch (rotation) {
-            default:
-                return in;
-            case -90:
-                return new ImPos(-in.getZ(), in.getY(), in.getX());
-            case 90:
-                return new ImPos(in.getZ(), in.getY(), -in.getX());
-            case 180:
-                return new ImPos(-in.getZ(), in.getY(), -in.getX());
+        // Swap x and z
+        if (this.rotation != 0) {
+            var temp = x;
+            x = z;
+            z = temp;
         }
+
+        // We have to flip the x or the y their sign in certain situations
+        var rotbitX = (this.rotation == -90 || this.rotation == 180) ? -1 : 1;
+        var rotbitY = (this.rotation == 90 || this.rotation == 180) ? -1 : 1;
+
+        return new Vec3d(
+                rotbitX * (x - originalX) + targetX,
+                (y - originalY) + targetY,
+                rotbitY * (z - originalZ) + targetZ
+        );
     }
 
     public BlockState rotateState(BlockState in) {
-        switch (rotation) {
-            default:
-                return in;
-            case 90:
-                return in.rotate(BlockRotation.COUNTERCLOCKWISE_90);
-            case -90:
-                return in.rotate(BlockRotation.CLOCKWISE_90);
-            case 180:
-                return in.rotate(BlockRotation.CLOCKWISE_180);
-        }
+        return switch (rotation) {
+            default -> in;
+            case 90 -> in.rotate(BlockRotation.COUNTERCLOCKWISE_90);
+            case -90 -> in.rotate(BlockRotation.CLOCKWISE_90);
+            case 180 -> in.rotate(BlockRotation.CLOCKWISE_180);
+        };
+    }
+
+    public Direction rotate(Direction in) {
+        return switch (in) {
+            default -> in;
+            case NORTH -> switch (this.rotation) {
+                default -> in;
+                case 90 -> Direction.WEST;
+                case -90 -> Direction.EAST;
+                case 190 -> Direction.SOUTH;
+            };
+            case WEST -> switch (this.rotation) {
+                default -> in;
+                case 90 -> Direction.SOUTH;
+                case -90 -> Direction.NORTH;
+                case 190 -> Direction.EAST;
+            };
+            case EAST -> switch (this.rotation) {
+                default -> in;
+                case 90 -> Direction.NORTH;
+                case -90 -> Direction.SOUTH;
+                case 190 -> Direction.WEST;
+            };
+            case SOUTH -> switch (this.rotation) {
+                default -> in;
+                case 90 -> Direction.EAST;
+                case -90 -> Direction.WEST;
+                case 190 -> Direction.NORTH;
+            };
+        };
     }
 
     public BlockState transformAndGetFromWorld(BlockPos pos, AsyncWorldView world) {
         BlockPos transformedPos = this.transform(pos);
         BlockState state = world.getBlock(transformedPos);
         return this.rotateState(state);
-    }
-
-    public BlockState transformAndGetFromWorld(BlockPos pos, ServerWorld world) {
-        BlockPos transformedPos = this.transform(pos);
-        BlockState state = Util.getBlockAsync(world, transformedPos);
-        return this.rotateState(state);
-    }
-
-    private static class ImPos {
-        final private int x;
-        final private int y;
-        final private int z;
-
-        public ImPos(int x, int y, int z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        public ImPos(BlockPos p) {
-            this(p.getX(), p.getY(), p.getZ());
-        }
-
-        public BlockPos addIntoBlockPos(ImPos v) {
-            return new BlockPos(x+v.x,y+v.y,z+v.z);
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public int getZ() {
-            return z;
-        }
     }
 }
