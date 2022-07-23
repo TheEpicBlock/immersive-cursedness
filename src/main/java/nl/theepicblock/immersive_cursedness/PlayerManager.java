@@ -30,7 +30,6 @@ public class PlayerManager {
         this.config = config;
     }
 
-    @SuppressWarnings("ConstantConditions")
     public void tick(int tickCount) {
         if (((PlayerInterface)player).immersivecursedness$getEnabled() == false) {
             return;
@@ -46,6 +45,7 @@ public class PlayerManager {
             blockCache = new BlockCache();
             justWentThroughPortal = true;
         }
+        var bottomOfWorld = sourceWorld.getBottomY();
 
         if (tickCount % 30 == 0 || justWentThroughPortal) {
             portalManager.update();
@@ -120,8 +120,8 @@ public class PlayerManager {
                         ret = transformProfile.transformAndGetFromWorld(pos, destinationView);
                     }
 
-                    if (pos.getY() == 1) ret = atmosphereBetweenBlock;
-                    if (pos.getY() == 0) ret = atmosphereBlock;
+                    if (pos.getY() == bottomOfWorld+1) ret = atmosphereBetweenBlock;
+                    if (pos.getY() == bottomOfWorld) ret = atmosphereBlock;
 
                     BlockPos imPos = pos.toImmutable();
                     sentBlocks.increment(imPos);
@@ -180,7 +180,7 @@ public class PlayerManager {
         BlockUpdateMap packetStorage = new BlockUpdateMap();
         ((PlayerInterface)player).immersivecursedness$setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {
-            BlockState originalBlock = Util.getBlockAsync((ServerWorld)player.getWorld(), pos);
+            BlockState originalBlock = Util.getBlockAsync(player.getWorld(), pos);
             if (originalBlock != cachedState) {
                 packetStorage.put(pos, originalBlock);
             }
@@ -188,7 +188,7 @@ public class PlayerManager {
         });
         for (Portal portal : portalManager.getPortals()) {
             BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                packetStorage.put(pos.toImmutable(), Util.getBlockAsync((ServerWorld)player.getWorld(), pos));
+                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getWorld(), pos));
             });
         }
         packetStorage.sendTo(this.player);
