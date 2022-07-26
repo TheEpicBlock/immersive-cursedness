@@ -14,6 +14,8 @@ public class Config implements ConfigData {
 	@Comment("Measured in chunks")
 	public int renderDistance = 3;
 	public boolean debugParticles = false;
+	@Comment("Whether Immersive Cursedness is on by default")
+	public boolean defaultEnabled = true;
 
 	public transient double squaredAtmosphereRadius;
 	public transient double squaredAtmosphereRadiusPlusOne;
