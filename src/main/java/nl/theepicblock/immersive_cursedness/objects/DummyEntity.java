@@ -31,17 +31,14 @@ public class DummyEntity extends Entity {
 
     @Override
     protected void initDataTracker() {
-
     }
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound tag) {
-
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound tag) {
-
     }
 
     @Override
