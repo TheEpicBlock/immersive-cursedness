@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayerEntity.class)
 public abstract class MixinServerPlayerEntity extends PlayerEntity implements PlayerInterface {
 	public MixinServerPlayerEntity(World world, BlockPos pos, float yaw, GameProfile profile, PlayerPublicKey publicKey) {
-		super(world, pos, yaw, profile, publicKey);
+		super(world, pos, yaw, profile);
 	}
 
 	@Unique private volatile boolean isCloseToPortal;
