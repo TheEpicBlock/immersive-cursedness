@@ -3,7 +3,6 @@ package nl.theepicblock.immersive_cursedness;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;

@@ -1,16 +1,13 @@
 package nl.theepicblock.immersive_cursedness.objects;
 
 import it.unimi.dsi.fastutil.ints.*;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class BlockCache {
 	public final static int CHUNK_SIZE = 2;

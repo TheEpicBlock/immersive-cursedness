@@ -5,8 +5,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldView;
 import net.minecraft.world.chunk.Chunk;
 import nl.theepicblock.immersive_cursedness.Util;
 
