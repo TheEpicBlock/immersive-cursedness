@@ -5,18 +5,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Heightmap;
 import net.minecraft.world.BlockLocating;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.dimension.AreaHelper;
+import net.minecraft.world.dimension.NetherPortal;
 import net.minecraft.world.dimension.DimensionType;
 import nl.theepicblock.immersive_cursedness.Util;
 
@@ -31,21 +30,18 @@ public class DummyEntity extends Entity {
 
     @Override
     protected void initDataTracker() {
-
     }
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound tag) {
-
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound tag) {
-
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<ClientPlayPacketListener> createSpawnPacket() {
         return null;
     }
 
@@ -80,8 +76,8 @@ public class DummyEntity extends Entity {
                 } else {
                     return null;
                 }
-
-                return AreaHelper.getNetherTeleportTarget(destination, portalPosA.get(), axis2, vec3d2, this.getDimensions(this.getPose()), this.getVelocity(), this.getYaw(), this.getPitch());
+                var entity = (Entity) (Object) this;
+                return NetherPortal.getNetherTeleportTarget(destination, portalPosA.get(), axis2, vec3d2, entity, this.getVelocity(), this.getYaw(), this.getPitch());
             } else {
                 return null;
             }

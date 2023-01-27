@@ -64,7 +64,7 @@ public class PlayerManager {
         BlockState atmosphereBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
-        if (player.hasNetherPortalCooldown())return;
+        if (player.hasPortalCooldown())return;
 
         boolean isCloseToPortal = false;
         //iterate through all portals

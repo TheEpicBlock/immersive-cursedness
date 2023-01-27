@@ -7,12 +7,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -22,6 +20,8 @@ import nl.theepicblock.immersive_cursedness.mixin.ServerChunkManagerInvoker;
 import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
 
 import java.util.Optional;
+
+import org.joml.Vector3f;
 
 public class Util {
     public static int follow(PointOfInterest[] list, BlockPos start, Direction direction) {
@@ -98,7 +98,7 @@ public class Util {
     }
 
     public static void sendParticle(ServerPlayerEntity player, Vec3d pos, float r, float g, float b) {
-        player.networkHandler.sendPacket(new ParticleS2CPacket(new DustParticleEffect(new Vec3f(r,g,b),1), true, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0));
+        player.networkHandler.sendPacket(new ParticleS2CPacket(new DustParticleEffect(new Vector3f(r,g,b),1), true, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0));
     }
 
     public static BlockPos makeBlockPos(double x, double y, double z) {
