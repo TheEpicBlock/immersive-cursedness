@@ -117,6 +117,7 @@ public class PlayerManager {
                     if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 
                     BlockState ret;
+                    BlockEntity entity = null;
 
                     if (dist > config.squaredAtmosphereRadius) {
                         ret = atmosphereBlock;
@@ -124,6 +125,7 @@ public class PlayerManager {
                         ret = atmosphereBetweenBlock;
                     } else {
                         ret = transformProfile.transformAndGetFromWorld(pos, destinationView);
+                        entity = transformProfile.transformAndGetFromWorldBlockEntity(pos, destinationView);
                     }
 
                     if (pos.getY() == bottomOfWorld+1) ret = atmosphereBetweenBlock;
@@ -135,6 +137,15 @@ public class PlayerManager {
                         if (!ret.isAir() || !sourceView.getBlock(pos).isAir()) {
                             blockCache.put(imPos, ret);
                             toBeSent.put(imPos, ret);
+                            if (entity != null) {
+                                var buf = PacketByteBufs.create();
+
+                                buf.writeBlockPos(imPos);
+                                buf.writeRegistryValue(Registries.BLOCK_ENTITY_TYPE, entity.getType());
+                                buf.writeNbt(entity.toInitialChunkDataNbt());
+
+                                blockEntityPackets.add(new BlockEntityUpdateS2CPacket(buf));
+                            }
                         }
                     }
                 });
@@ -147,6 +158,16 @@ public class PlayerManager {
             BlockState originalBlock = sourceView.getBlock(pos);
             if (originalBlock != cachedState) {
                 toBeSent.put(pos, originalBlock);
+                BlockEntity entity = sourceView.getBlockEntity(pos);
+                if (entity != null) {
+                    var buf = PacketByteBufs.create();
+
+                    buf.writeBlockPos(pos);
+                    buf.writeRegistryValue(Registries.BLOCK_ENTITY_TYPE, entity.getType());
+                    buf.writeNbt(entity.toInitialChunkDataNbt());
+
+                    blockEntityPackets.add(new BlockEntityUpdateS2CPacket(buf));
+                }
             }
             if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
@@ -161,6 +182,9 @@ public class PlayerManager {
             }
         });
         toBeSent.sendTo(this.player);
+        for (var packet : blockEntityPackets) {
+            this.player.networkHandler.sendPacket(packet);
+        }
         previousWorld = sourceWorld;
     }
 

@@ -133,4 +133,9 @@ public class TransformProfile {
         BlockState state = world.getBlock(transformedPos);
         return this.rotateState(state);
     }
+
+    public BlockEntity transformAndGetFromWorldBlockEntity(BlockPos pos, AsyncWorldView world) {
+        BlockPos transformedPos = this.transform(pos);
+        return world.getBlockEntity(transformedPos);
+    }
 }
