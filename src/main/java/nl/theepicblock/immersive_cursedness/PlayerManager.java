@@ -3,8 +3,13 @@ package nl.theepicblock.immersive_cursedness;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
@@ -54,6 +59,7 @@ public class PlayerManager {
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(portalManager.getPortals().size()*config.portalDepth);
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
         BlockUpdateMap toBeSent = new BlockUpdateMap();
+        List<BlockEntityUpdateS2CPacket> blockEntityPackets = new ArrayList<>();
 
         List<Entity> entities;
         try {
@@ -64,7 +70,7 @@ public class PlayerManager {
         BlockState atmosphereBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
-        if (player.hasNetherPortalCooldown())return;
+        if (player.hasPortalCooldown())return;
 
         boolean isCloseToPortal = false;
         //iterate through all portals
@@ -180,7 +186,7 @@ public class PlayerManager {
         BlockUpdateMap packetStorage = new BlockUpdateMap();
         ((PlayerInterface)player).immersivecursedness$setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {
-            BlockState originalBlock = Util.getBlockAsync(player.getWorld(), pos);
+            BlockState originalBlock = Util.getBlockAsync(player.getServerWorld(), pos);
             if (originalBlock != cachedState) {
                 packetStorage.put(pos, originalBlock);
             }
@@ -188,7 +194,7 @@ public class PlayerManager {
         });
         for (Portal portal : portalManager.getPortals()) {
             BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getWorld(), pos));
+                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getServerWorld(), pos));
             });
         }
         packetStorage.sendTo(this.player);

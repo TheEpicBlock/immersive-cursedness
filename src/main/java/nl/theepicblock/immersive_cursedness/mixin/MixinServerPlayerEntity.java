@@ -16,17 +16,21 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @SuppressWarnings("PointlessBooleanExpression")
 @Mixin(ServerPlayerEntity.class)
-public abstract class MixinServerPlayerEntity extends PlayerEntity implements PlayerInterface {
+public abstract class MixinServerPlayerEntity extends MixinPlayerEntity implements PlayerInterface {
 	public MixinServerPlayerEntity(World world, BlockPos pos, float yaw, GameProfile profile, PlayerPublicKey publicKey) {
-		super(world, pos, yaw, profile, publicKey);
+		super(world, pos, yaw, profile);
 	}
 
-	@Unique private volatile boolean isCloseToPortal;
-	@Unique private World unFakedWorld;
-	@Unique private boolean enabled = true;
+	@Unique
+	private volatile boolean isCloseToPortal;
+	@Unique
+	private World unFakedWorld;
+	@Unique
+	private boolean enabled = true;
 
 	@Override
 	public void immersivecursedness$setCloseToPortal(boolean v) {
@@ -40,21 +44,21 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 
 	@Override
 	public void immersivecursedness$fakeWorld(World world) {
-		unFakedWorld = this.world;
-		this.world = world;
+		unFakedWorld = this.getWorld();
+		this.setWorld(world);
 	}
 
 	@Override
 	public void immersivecursedness$deFakeWorld() {
 		if (unFakedWorld != null) {
-			this.world = unFakedWorld;
+			setWorld(unFakedWorld);
 			unFakedWorld = null;
 		}
 	}
 
 	@Override
 	public ServerWorld immersivecursedness$getUnfakedWorld() {
-		if (unFakedWorld != null) return (ServerWorld)unFakedWorld;
+		if (unFakedWorld != null) return (ServerWorld) unFakedWorld;
 		return (ServerWorld) getWorld();
 	}
 
@@ -77,10 +81,17 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements Pl
 	@Override
 	public void immersivecursedness$setEnabled(boolean v) {
 		enabled = v;
+
 	}
 
 	@Override
 	public boolean immersivecursedness$getEnabled() {
 		return enabled;
+	}
+
+	@Override
+	public void handleGetMaxNetherPortalTime(CallbackInfoReturnable<Integer> cir) {
+		if (enabled)
+			cir.setReturnValue(1);
 	}
 }

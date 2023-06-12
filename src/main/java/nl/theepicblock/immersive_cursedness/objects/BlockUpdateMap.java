@@ -32,7 +32,7 @@ public class BlockUpdateMap extends Long2ObjectOpenHashMap<Short2ObjectMap<Block
         this.forEach((chunkSection, chunkContents) -> {
             var buf = PacketByteBufs.create();
             buf.writeLong(chunkSection);
-            buf.writeBoolean(false);
+            //buf.writeBoolean(false);
             buf.writeVarInt(chunkContents.size());
 
             for (Short2ObjectMap.Entry<BlockState> entry : chunkContents.short2ObjectEntrySet()) {

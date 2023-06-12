@@ -7,6 +7,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
@@ -119,7 +120,7 @@ public class PortalManager {
 
         return new TransformProfile(
                 pos,
-                new BlockPos(teleportTarget.position),
+                new BlockPos(MathHelper.floor(teleportTarget.position.x), MathHelper.floor(teleportTarget.position.y), MathHelper.floor(teleportTarget.position.z)),
                 0,
                 (int)teleportTarget.yaw);
     }
