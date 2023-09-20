@@ -1,4 +1,14 @@
-# Immersive Cursedness
+# Immersive Cursedness Updated Fork
+
+This is an updated fork of TheEpicBlock's Immersive Cursedness.
+
+Warning: This was only lightly tested on 1.20.1. There may be bugs.
+
+Also, it supports block entities.
+
+Woo-hoo!
+
+---
 
 Have you ever used Immersive Portals and thought *this isn't cursed enough*? Then this mod is for you!
 It uses advanced cursedness to deliver immersiveness straight to the client. And uses intelligent packet spam to ensure clients don't even have to install the mod themselves!
