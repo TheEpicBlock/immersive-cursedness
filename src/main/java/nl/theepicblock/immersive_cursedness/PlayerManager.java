@@ -3,8 +3,13 @@ package nl.theepicblock.immersive_cursedness;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
@@ -54,6 +59,7 @@ public class PlayerManager {
         List<FlatStandingRectangle> sentLayers = new ArrayList<>(portalManager.getPortals().size()*config.portalDepth);
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
         BlockUpdateMap toBeSent = new BlockUpdateMap();
+        List<BlockEntityUpdateS2CPacket> blockEntityPackets = new ArrayList<>();
 
         List<Entity> entities;
         try {
@@ -64,7 +70,7 @@ public class PlayerManager {
         BlockState atmosphereBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
-        if (player.hasNetherPortalCooldown())return;
+        if (player.hasPortalCooldown())return;
 
         boolean isCloseToPortal = false;
         //iterate through all portals
@@ -111,6 +117,7 @@ public class PlayerManager {
                     if (dist > config.squaredAtmosphereRadiusPlusOne) return;
 
                     BlockState ret;
+                    BlockEntity entity = null;
 
                     if (dist > config.squaredAtmosphereRadius) {
                         ret = atmosphereBlock;
@@ -118,6 +125,7 @@ public class PlayerManager {
                         ret = atmosphereBetweenBlock;
                     } else {
                         ret = transformProfile.transformAndGetFromWorld(pos, destinationView);
+                        entity = transformProfile.transformAndGetFromWorldBlockEntity(pos, destinationView);
                     }
 
                     if (pos.getY() == bottomOfWorld+1) ret = atmosphereBetweenBlock;
@@ -129,6 +137,15 @@ public class PlayerManager {
                         if (!ret.isAir() || !sourceView.getBlock(pos).isAir()) {
                             blockCache.put(imPos, ret);
                             toBeSent.put(imPos, ret);
+                            if (entity != null) {
+                                var buf = PacketByteBufs.create();
+
+                                buf.writeBlockPos(imPos);
+                                buf.writeRegistryValue(Registries.BLOCK_ENTITY_TYPE, entity.getType());
+                                buf.writeNbt(entity.toInitialChunkDataNbt());
+
+                                blockEntityPackets.add(new BlockEntityUpdateS2CPacket(buf));
+                            }
                         }
                     }
                 });
@@ -141,6 +158,16 @@ public class PlayerManager {
             BlockState originalBlock = sourceView.getBlock(pos);
             if (originalBlock != cachedState) {
                 toBeSent.put(pos, originalBlock);
+                BlockEntity entity = sourceView.getBlockEntity(pos);
+                if (entity != null) {
+                    var buf = PacketByteBufs.create();
+
+                    buf.writeBlockPos(pos);
+                    buf.writeRegistryValue(Registries.BLOCK_ENTITY_TYPE, entity.getType());
+                    buf.writeNbt(entity.toInitialChunkDataNbt());
+
+                    blockEntityPackets.add(new BlockEntityUpdateS2CPacket(buf));
+                }
             }
             if (config.debugParticles) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
@@ -155,6 +182,9 @@ public class PlayerManager {
             }
         });
         toBeSent.sendTo(this.player);
+        for (var packet : blockEntityPackets) {
+            this.player.networkHandler.sendPacket(packet);
+        }
         previousWorld = sourceWorld;
     }
 
@@ -180,7 +210,7 @@ public class PlayerManager {
         BlockUpdateMap packetStorage = new BlockUpdateMap();
         ((PlayerInterface)player).immersivecursedness$setCloseToPortal(false);
         blockCache.purgeAll((pos, cachedState) -> {
-            BlockState originalBlock = Util.getBlockAsync(player.getWorld(), pos);
+            BlockState originalBlock = Util.getBlockAsync(player.getServerWorld(), pos);
             if (originalBlock != cachedState) {
                 packetStorage.put(pos, originalBlock);
             }
@@ -188,7 +218,7 @@ public class PlayerManager {
         });
         for (Portal portal : portalManager.getPortals()) {
             BlockPos.iterate(portal.getLowerLeft(), portal.getUpperRight()).forEach(pos -> {
-                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getWorld(), pos));
+                packetStorage.put(pos.toImmutable(), Util.getBlockAsync(player.getServerWorld(), pos));
             });
         }
         packetStorage.sendTo(this.player);

@@ -4,7 +4,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -16,7 +17,7 @@ import net.minecraft.world.BlockLocating;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.dimension.AreaHelper;
+import net.minecraft.world.dimension.NetherPortal;
 import net.minecraft.world.dimension.DimensionType;
 import nl.theepicblock.immersive_cursedness.Util;
 
@@ -45,7 +46,7 @@ public class DummyEntity extends Entity {
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<ClientPlayPacketListener> createSpawnPacket() {
         return null;
     }
 
@@ -62,26 +63,27 @@ public class DummyEntity extends Entity {
     @Override
     protected TeleportTarget getTeleportTarget(ServerWorld destination) {
         boolean bl3 = destination.getRegistryKey() == World.NETHER;
-        if (this.world.getRegistryKey() != World.NETHER && !bl3) {
+        if (this.getWorld().getRegistryKey() != World.NETHER && !bl3) {
             return null;
         } else {
-            double coordinateScale = DimensionType.getCoordinateScaleFactor(this.world.getDimension(), destination.getDimension());
-            BlockPos blockPos3 = new BlockPos(this.getX() * coordinateScale, this.getY(), this.getZ() * coordinateScale);
+            double coordinateScale = DimensionType.getCoordinateScaleFactor(this.getWorld().getDimension(), destination.getDimension());
+            BlockPos blockPos3 = new BlockPos(MathHelper.floor(this.getX() * coordinateScale), MathHelper.floor(this.getY()), MathHelper.floor(this.getZ() * coordinateScale));
             WorldBorder worldBorder = destination.getWorldBorder();
             Optional<BlockLocating.Rectangle> portalPosA = this.getPortalRect(destination, blockPos3, bl3, worldBorder);
             if (portalPosA.isPresent()) {
-                BlockState blockState = Util.getBlockAsync((ServerWorld)this.world, this.lastNetherPortalPosition);
+                BlockState blockState = Util.getBlockAsync((ServerWorld)this.getWorld(), this.lastNetherPortalPosition);
                 Direction.Axis axis2;
                 Vec3d vec3d2;
                 if (blockState.contains(Properties.HORIZONTAL_AXIS)) {
                     axis2 = blockState.get(Properties.HORIZONTAL_AXIS);
-                    BlockLocating.Rectangle portalPos = BlockLocating.getLargestRectangle(this.lastNetherPortalPosition, axis2, 21, Direction.Axis.Y, 21, (blockPos) -> Util.getBlockAsync((ServerWorld)this.world, blockPos) == blockState);
+                    BlockLocating.Rectangle portalPos = BlockLocating.getLargestRectangle(this.lastNetherPortalPosition, axis2, 21, Direction.Axis.Y, 21, (blockPos) -> Util.getBlockAsync((ServerWorld)this.getWorld(), blockPos) == blockState);
                     vec3d2 = this.positionInPortal(axis2, portalPos);
                 } else {
                     return null;
                 }
 
-                return AreaHelper.getNetherTeleportTarget(destination, portalPosA.get(), axis2, vec3d2, this.getDimensions(this.getPose()), this.getVelocity(), this.getYaw(), this.getPitch());
+                var entity = (Entity) (Object) this;
+                return NetherPortal.getNetherTeleportTarget(destination, portalPosA.get(), axis2, vec3d2, entity, this.getVelocity(), this.getYaw(), this.getPitch());
             } else {
                 return null;
             }

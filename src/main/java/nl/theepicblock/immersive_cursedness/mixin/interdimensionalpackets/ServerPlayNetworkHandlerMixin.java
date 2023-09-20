@@ -1,6 +1,6 @@
 package nl.theepicblock.immersive_cursedness.mixin.interdimensionalpackets;
 
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -26,7 +26,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 	@Unique
 	private TransformProfile transformProfile;
 
-	@Inject(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V"))
+	@Inject(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V"))
 	public void setTransformProfile(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
 		if (PlayerInterface.isCloseToPortal(this.player)) {
 			PlayerManager manager = Util.getManagerFromPlayer(player);
@@ -45,12 +45,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		}
 	}
 
-	@Redirect(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getWorld()Lnet/minecraft/server/world/ServerWorld;"))
+	@Redirect(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getServerWorld()Lnet/minecraft/server/world/ServerWorld;"))
 	public ServerWorld modifyWorld(ServerPlayerEntity player, PlayerInteractBlockC2SPacket packet) {
 		if (transformProfile != null) {
 			return Util.getDestination(player);
 		}
-		return player.getWorld();
+		return player.getServerWorld();
 	}
 
 	@ModifyArg(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
@@ -61,12 +61,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		return pos;
 	}
 
-	@ModifyArg(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V"))
+	@ModifyArg(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
 	public Packet<?> modifyReturnPacket(Packet<?> packet) {
 		if (transformProfile != null && packet instanceof BlockUpdateS2CPacket blockUpdate) {
 			var oldPos = blockUpdate.getPos();
 			var newPos = transformProfile.transform(oldPos);
-			return new BlockUpdateS2CPacket(oldPos, player.world.getBlockState(newPos));
+			return new BlockUpdateS2CPacket(oldPos, player.getWorld().getBlockState(newPos));
 		}
 		return packet;
 	}

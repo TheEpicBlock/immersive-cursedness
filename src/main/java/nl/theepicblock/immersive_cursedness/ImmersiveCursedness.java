@@ -37,7 +37,7 @@ public class ImmersiveCursedness implements ModInitializer {
                     .then(CommandManager.literal("toggle").executes((context) -> {
                         PlayerInterface pi = (PlayerInterface)context.getSource().getPlayer();
                         pi.immersivecursedness$setEnabled(!pi.immersivecursedness$getEnabled());
-                        context.getSource().sendFeedback(Text.literal("you have now "+ (pi.immersivecursedness$getEnabled() ? "enabled" : "disabled") +" immersive portals"), false);
+                        //context.getSource().sendFeedback(Text.literal("you have now "+ (pi.immersivecursedness$getEnabled() ? "enabled" : "disabled") +" immersive portals"), false);
                         if (pi.immersivecursedness$getEnabled() == false) {
                             Util.getManagerFromPlayer(context.getSource().getPlayer()).purgeCache();
                         }
